@@ -1,6 +1,9 @@
 import json
+import shutil
+import uuid
+from pathlib import Path
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile, File, Form, Request, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -13,6 +16,9 @@ router = APIRouter(
     prefix="/api/registros-fauna",
     tags=["Registros Fauna"],
 )
+
+MEDIA_ROOT = Path(__file__).resolve().parents[1] / "media"
+FAUNA_ROOT = MEDIA_ROOT / "fauna"
 
 @router.get("/admin", response_model=list[RegistroFaunaOut], dependencies=[Depends(require_admin)])
 def listar_registros_fauna_admin(db: Session = Depends(get_db)):
@@ -72,3 +78,49 @@ def criar_ou_atualizar(
     db.commit()
     db.refresh(novo)
     return novo
+
+
+def _save_upload(file: UploadFile, dest_dir: Path, prefix: str) -> Path:
+    suffix = Path(file.filename or "").suffix or ".jpg"
+    filename = f"{prefix}_{uuid.uuid4().hex}{suffix}"
+    dest = dest_dir / filename
+    with dest.open("wb") as target:
+        shutil.copyfileobj(file.file, target)
+    return dest
+
+
+@router.post("/upload")
+def upload_fotos(
+    request: Request,
+    id_dispositivo: str = Form(...),
+    foto_animal: UploadFile | None = File(default=None),
+    foto_local: UploadFile | None = File(default=None),
+    colaborador: ColaboradorCampo = Depends(get_current_colaborador),
+):
+    if foto_animal is None and foto_local is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Envie pelo menos um arquivo.",
+        )
+
+    target_dir = FAUNA_ROOT / str(colaborador.id) / id_dispositivo
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    result: dict[str, str | None] = {
+        "foto_animal_url": None,
+        "foto_local_url": None,
+    }
+
+    base_url = str(request.base_url).rstrip("/")
+
+    if foto_animal is not None:
+        saved = _save_upload(foto_animal, target_dir, "animal")
+        rel = saved.relative_to(MEDIA_ROOT).as_posix()
+        result["foto_animal_url"] = f"{base_url}/media/{rel}"
+
+    if foto_local is not None:
+        saved = _save_upload(foto_local, target_dir, "local")
+        rel = saved.relative_to(MEDIA_ROOT).as_posix()
+        result["foto_local_url"] = f"{base_url}/media/{rel}"
+
+    return result

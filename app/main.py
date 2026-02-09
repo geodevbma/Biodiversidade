@@ -1,4 +1,6 @@
 from fastapi import FastAPI, Request, Depends
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -13,6 +15,10 @@ from app.db.init_db import init_db
 app = FastAPI(title="Sistema Biodiversidade - Web")
 
 templates = Jinja2Templates(directory="app/templates")
+
+media_dir = Path(__file__).resolve().parent / "media"
+media_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/media", StaticFiles(directory=str(media_dir)), name="media")
 
 app.include_router(auth.router)
 app.include_router(colaboradores.router)

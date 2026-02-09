@@ -1,0 +1,150 @@
+2026-02-03 10:58:21,299 | INFO | === Iniciando teste_sistema.py ===
+2026-02-03 10:58:21,512 | INFO | PASS | GET / (tela de login)
+2026-02-03 10:58:21,517 | INFO | PASS | GET /admin/dashboard sem autenticação -> 401
+2026-02-03 10:58:21,526 | ERROR | FAIL | POST /auth/login (admin) | Esperado status 200, veio 422. Body: {"detail":[{"type":"value_error","loc":["body","email"],"msg":"value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email.","input":
+2026-02-03 10:58:21,582 | ERROR | FAIL | POST /auth/colaborador/login | Exception: 1 validation error:
+  {'type': 'value_error', 'loc': ('response', 'colaborador', 'email'), 'msg': 'value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email.', 'input': 'colab@teste.local', 'ctx': {'reason': 'The part after the @-sign is a special-use or reserved name that cannot be used with email.'}}
+
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\app\routers\auth.py", line 74, in login_colaborador
+    POST /auth/colaborador/login
+Traceback (most recent call last):
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\teste_sistema.py", line 121, in check
+    fn()
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\teste_sistema.py", line 210, in do_colab_login
+    r = client.post("/auth/colaborador/login", json={"usuario": "colab@teste.local", "senha": "Colab@123"})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\starlette\testclient.py", line 546, in post
+    return super().post(
+           ^^^^^^^^^^^^^
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\httpx\_client.py", line 1144, in post
+    return self.request(
+           ^^^^^^^^^^^^^
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\starlette\testclient.py", line 445, in request
+    return super().request(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\httpx\_client.py", line 825, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\httpx\_client.py", line 914, in send
+    response = self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\httpx\_client.py", line 942, in _send_handling_auth
+    response = self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\httpx\_client.py", line 979, in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\httpx\_client.py", line 1014, in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\starlette\testclient.py", line 348, in handle_request
+    raise exc
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\starlette\testclient.py", line 345, in handle_request
+    portal.call(self.app, scope, receive, send)
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\anyio\from_thread.py", line 334, in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gabriel.rocha\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py", line 456, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gabriel.rocha\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\anyio\from_thread.py", line 259, in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\fastapi\applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\starlette\applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\fastapi\routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\fastapi\routing.py", line 101, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\fastapi\routing.py", line 377, in app
+    content = await serialize_response(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\venv\Lib\site-packages\fastapi\routing.py", line 215, in serialize_response
+    raise ResponseValidationError(
+fastapi.exceptions.ResponseValidationError: 1 validation error:
+  {'type': 'value_error', 'loc': ('response', 'colaborador', 'email'), 'msg': 'value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email.', 'input': 'colab@teste.local', 'ctx': {'reason': 'The part after the @-sign is a special-use or reserved name that cannot be used with email.'}}
+
+  File "C:\Users\gabriel.rocha\Desktop\APP_Bio\app\routers\auth.py", line 74, in login_colaborador
+    POST /auth/colaborador/login
+2026-02-03 10:58:21,590 | ERROR | FAIL | GET /auth/colaborador/me | Token do colaborador nao foi gerado
+2026-02-03 10:58:21,594 | ERROR | FAIL | GET /admin/dashboard (autenticado) | Esperado status 200, veio 401. Body: {"detail":"Não autenticado."}
+2026-02-03 10:58:21,600 | ERROR | FAIL | GET /admin/colaboradores (autenticado) | Esperado status 200, veio 401. Body: {"detail":"Não autenticado."}
+2026-02-03 10:58:21,605 | ERROR | FAIL | GET /admin/registros (autenticado) | Esperado status 200, veio 401. Body: {"detail":"Não autenticado."}
+2026-02-03 10:58:21,609 | ERROR | FAIL | POST /api/colaboradores/ | Esperado status 201, veio 401. Body: {"detail":"Não autenticado."}
+2026-02-03 10:58:21,614 | ERROR | FAIL | GET /api/colaboradores/ | Esperado status 200, veio 401. Body: {"detail":"Não autenticado."}
+2026-02-03 10:58:21,614 | ERROR | FAIL | GET /api/colaboradores/{id} | ID do colaborador não foi criado
+2026-02-03 10:58:21,618 | ERROR | FAIL | PUT /api/colaboradores/{id} | Esperado status 200, veio 401. Body: {"detail":"Não autenticado."}
+2026-02-03 10:58:21,622 | ERROR | FAIL | DELETE /api/colaboradores/{id} | Esperado status 204, veio 401. Body: {"detail":"Não autenticado."}
+2026-02-03 10:58:21,626 | ERROR | FAIL | GET /api/registros/ | Esperado status 200, veio 401. Body: {"detail":"Não autenticado."}
+2026-02-03 10:58:21,627 | INFO | === Resumo ===
+2026-02-03 10:58:21,627 | INFO | PASS: 2
+2026-02-03 10:58:21,627 | INFO | FAIL: 12
+2026-02-03 10:58:21,627 | INFO | LOG: C:\Users\gabriel.rocha\Desktop\APP_Bio\teste_sistema.log
+2026-02-03 10:58:21,627 | INFO | DB (SQLite): C:\Users\gabriel.rocha\Desktop\APP_Bio\teste_sistema.sqlite3
+2026-02-03 11:00:16,698 | INFO | === Iniciando teste_sistema.py ===
+2026-02-03 11:00:16,878 | INFO | PASS | GET / (tela de login)
+2026-02-03 11:00:16,884 | INFO | PASS | GET /admin/dashboard sem autenticação -> 401
+2026-02-03 11:00:16,938 | INFO | PASS | POST /auth/login (admin)
+2026-02-03 11:00:16,985 | INFO | PASS | POST /auth/colaborador/login
+2026-02-03 11:00:16,992 | INFO | PASS | GET /auth/colaborador/me
+2026-02-03 11:00:17,004 | INFO | PASS | GET /admin/dashboard (autenticado)
+2026-02-03 11:00:17,012 | INFO | PASS | GET /admin/colaboradores (autenticado)
+2026-02-03 11:00:17,021 | INFO | PASS | GET /admin/registros (autenticado)
+2026-02-03 11:00:17,075 | INFO | PASS | POST /api/colaboradores/
+2026-02-03 11:00:17,080 | INFO | PASS | GET /api/colaboradores/
+2026-02-03 11:00:17,087 | INFO | PASS | GET /api/colaboradores/{id}
+2026-02-03 11:00:17,099 | INFO | PASS | PUT /api/colaboradores/{id}
+2026-02-03 11:00:17,113 | INFO | PASS | DELETE /api/colaboradores/{id}
+2026-02-03 11:00:17,121 | INFO | PASS | GET /api/registros/
+2026-02-03 11:00:17,121 | INFO | === Resumo ===
+2026-02-03 11:00:17,121 | INFO | PASS: 14
+2026-02-03 11:00:17,121 | INFO | FAIL: 0
+2026-02-03 11:00:17,121 | INFO | LOG: C:\Users\gabriel.rocha\Desktop\APP_Bio\teste_sistema.log
+2026-02-03 11:00:17,122 | INFO | DB (SQLite): C:\Users\gabriel.rocha\Desktop\APP_Bio\teste_sistema.sqlite3
+2026-02-09 14:34:59,486 | INFO | === Iniciando teste_sistema.py ===
+2026-02-09 14:34:59,740 | INFO | PASS | GET / (tela de login)
+2026-02-09 14:34:59,745 | INFO | PASS | GET /admin/dashboard sem autenticação -> 401
+2026-02-09 14:34:59,807 | INFO | PASS | POST /auth/login (admin)
+2026-02-09 14:34:59,853 | INFO | PASS | POST /auth/colaborador/login
+2026-02-09 14:34:59,860 | INFO | PASS | GET /auth/colaborador/me
+2026-02-09 14:34:59,876 | INFO | PASS | GET /admin/dashboard (autenticado)
+2026-02-09 14:34:59,885 | INFO | PASS | GET /admin/colaboradores (autenticado)
+2026-02-09 14:34:59,895 | INFO | PASS | GET /admin/registros (autenticado)
+2026-02-09 14:34:59,950 | INFO | PASS | POST /api/colaboradores/
+2026-02-09 14:34:59,957 | INFO | PASS | GET /api/colaboradores/
+2026-02-09 14:34:59,964 | INFO | PASS | GET /api/colaboradores/{id}
+2026-02-09 14:34:59,979 | INFO | PASS | PUT /api/colaboradores/{id}
+2026-02-09 14:34:59,996 | INFO | PASS | DELETE /api/colaboradores/{id}
+2026-02-09 14:35:00,006 | INFO | PASS | GET /api/registros/
+2026-02-09 14:35:00,006 | INFO | === Resumo ===
+2026-02-09 14:35:00,006 | INFO | PASS: 14
+2026-02-09 14:35:00,006 | INFO | FAIL: 0
+2026-02-09 14:35:00,006 | INFO | LOG: C:\Users\gabriel.rocha\Desktop\APP_Bio\teste_sistema.log
+2026-02-09 14:35:00,006 | INFO | DB (SQLite): C:\Users\gabriel.rocha\Desktop\APP_Bio\teste_sistema.sqlite3
