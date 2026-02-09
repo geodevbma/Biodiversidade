@@ -1,0 +1,539 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard • Biodiversidade{% endblock %}
+
+{% block header_title %}Visão Geral{% endblock %}
+
+{% block header_subtitle %}
+<p class="text-[13px] text-slate-400 font-medium">
+  Monitoramento em tempo real • <span class="text-emerald-400">{{ user.nome }}</span>
+</p>
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+  /* Fundo com textura sutil */
+  .bg-noise {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-color: #020617; /* slate-950 */
+    background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+    opacity: 0.05;
+    pointer-events: none;
+  }
+
+  /* Estilo base dos Cards */
+  .bento-card {
+    @apply relative bg-slate-900/60 backdrop-blur-md border border-slate-800/60 rounded-2xl overflow-hidden transition-all duration-300;
+  }
+  .bento-card:hover {
+    @apply border-emerald-500/30 shadow-[0_0_30px_-10px_rgba(16,185,129,0.1)];
+  }
+
+  /* Scrollbar fina para tabelas/listas */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+  #map { z-index: 1; height: 100%; width: 100%; background: #0f172a; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-noise"></div>
+
+<div class="space-y-5 pb-10 animate-fadeUp">
+  
+  <div class="sticky top-4 z-20 bento-card p-2 px-4 shadow-xl shadow-slate-950/50">
+    <form id="filter-form" class="flex flex-wrap items-center gap-3 justify-between">
+      
+      <div class="hidden md:flex items-center gap-2 pr-4 border-r border-slate-800/80">
+        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+        <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Filtros</span>
+      </div>
+
+      <div class="flex flex-wrap gap-2 items-center flex-1">
+        <div class="relative group">
+          <input type="date" id="data-inicio" class="w-32 bg-slate-950 border border-slate-700 text-slate-300 text-xs rounded-lg px-2 py-1.5 focus:border-emerald-500 outline-none">
+          <span class="absolute -top-2 left-2 px-1 bg-slate-900 text-[9px] text-slate-500">De</span>
+        </div>
+        
+        <div class="relative group">
+          <input type="date" id="data-fim" class="w-32 bg-slate-950 border border-slate-700 text-slate-300 text-xs rounded-lg px-2 py-1.5 focus:border-emerald-500 outline-none">
+          <span class="absolute -top-2 left-2 px-1 bg-slate-900 text-[9px] text-slate-500">Até</span>
+        </div>
+
+        <select id="projeto" class="w-full md:w-48 bg-slate-950 border border-slate-700 text-slate-300 text-xs rounded-lg px-2 py-1.5 focus:border-emerald-500 outline-none">
+          <option value="">Todos os Projetos</option>
+          {% for proj in projetos %}
+            <option value="{{ proj }}">{{ proj }}</option>
+          {% endfor %}
+        </select>
+
+        <select id="tipo-registro" class="w-full md:w-48 bg-slate-950 border border-slate-700 text-slate-300 text-xs rounded-lg px-2 py-1.5 focus:border-emerald-500 outline-none">
+          <option value="">Todos os tipos</option>
+          <option value="fauna">Fauna</option>
+          <option value="flora">Flora</option>
+          <option value="inventario_florestal">Inventario florestal</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button type="button" id="btn-aplicar" class="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold rounded-lg transition-colors shadow shadow-emerald-500/20">
+          Atualizar
+        </button>
+        <button type="button" id="btn-limpar" class="p-1.5 text-slate-400 hover:text-white transition-colors" title="Limpar Filtros">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bento-card p-4 flex items-center justify-between group">
+      <div>
+        <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Registros Totais</p>
+        <h3 id="kpi-total" class="text-3xl font-bold text-slate-100 group-hover:text-emerald-400 transition-colors">--</h3>
+      </div>
+      <div class="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500/10 transition-all">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+      </div>
+    </div>
+
+    <div class="bento-card p-4 flex items-center justify-between group">
+      <div>
+        <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Espécies Únicas</p>
+        <h3 id="kpi-especies" class="text-3xl font-bold text-slate-100">--</h3>
+      </div>
+      <div class="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center text-blue-400 group-hover:bg-blue-500/10 transition-all">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+      </div>
+    </div>
+
+    <div class="bento-card p-4 flex items-center justify-between group">
+      <div>
+        <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Projetos Ativos</p>
+        <h3 id="kpi-projetos" class="text-3xl font-bold text-slate-100">--</h3>
+      </div>
+      <div class="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center text-purple-400 group-hover:bg-purple-500/10 transition-all">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+      </div>
+    </div>
+    
+    <div class="bento-card p-4 flex items-center justify-between group">
+      <div>
+        <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Registros com GPS</p>
+        <h3 id="kpi-gps" class="text-3xl font-bold text-slate-100">--</h3>
+      </div>
+      <div class="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center text-amber-400 group-hover:bg-amber-500/10 transition-all">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 h-auto lg:h-[500px]">
+    
+    <div class="lg:col-span-8 bento-card flex flex-col">
+      <div class="px-4 py-3 border-b border-slate-800 flex justify-between items-center">
+        <h3 class="text-sm font-semibold text-slate-100 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Distribuição Geográfica
+        </h3>
+        <div class="flex gap-2">
+            <button class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300">Satélite</button>
+            <button class="text-[10px] bg-emerald-900/30 border border-emerald-500/30 text-emerald-400 px-2 py-1 rounded">Terreno</button>
+        </div>
+      </div>
+      <div class="flex-1 relative bg-slate-900 group">
+        <div id="map"></div>
+        <div class="absolute bottom-4 left-4 bg-slate-950/80 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-800 text-[10px] text-slate-400 pointer-events-none z-[400]">
+          Use <span class="text-white font-mono">Shift + Drag</span> para zoom na área
+        </div>
+      </div>
+    </div>
+
+    <div class="lg:col-span-4 flex flex-col gap-4">
+        
+        <div class="bento-card p-4 flex-1 flex flex-col">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-xs font-semibold text-slate-200 uppercase tracking-wide">Por Categoria Biológica</h3>
+                <button class="text-slate-500 hover:text-white"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg></button>
+            </div>
+            <div class="flex-1 relative min-h-[180px]">
+                <canvas id="grafico-tipo"></canvas>
+            </div>
+        </div>
+
+        <div class="bento-card p-4 flex-1 flex flex-col">
+            <div class="flex justify-between items-start mb-2">
+                <h3 class="text-xs font-semibold text-slate-200 uppercase tracking-wide">Top Projetos</h3>
+            </div>
+            <div class="flex-1 relative min-h-[150px]">
+                <canvas id="grafico-projeto"></canvas>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4">
+    <div class="bento-card p-5">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h3 class="text-sm font-semibold text-slate-100">Evolução Temporal dos Registros</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">Volume de dados coletados nos últimos 12 meses</p>
+        </div>
+        <div class="flex gap-4 text-[10px]">
+            <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>Validados</div>
+            <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-600"></span>Pendentes</div>
+        </div>
+      </div>
+      <div class="relative w-full h-[220px]">
+        <canvas id="grafico-data"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="modal fade" id="fotosModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content bg-slate-950 text-slate-100 border border-slate-800 shadow-2xl shadow-black">
+      <div class="modal-header border-b border-slate-800 py-3">
+        <h5 class="modal-title text-sm font-semibold text-emerald-400">Registro Fotográfico</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body p-0 bg-black">
+        <div id="fotosCarousel" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner" id="carousel-inner"></div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#fotosCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#fotosCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+  <script>
+    // Configuracao padrao do Chart.js para Dark Mode
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.borderColor = '#1e293b';
+    Chart.defaults.font.family = "'Inter', sans-serif";
+
+    // Inicializacao do Mapa
+    const map = L.map('map', { zoomControl: false }).setView([-15.78, -47.93], 4);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap &copy; CARTO',
+      subdomains: 'abcd',
+      maxZoom: 20
+    }).addTo(map);
+
+    const markersLayer = L.layerGroup().addTo(map);
+    map.on('moveend', () => {
+      if (registrosFiltrados.length) {
+        aplicarViewport();
+      }
+    });
+
+    const kpiTotal = document.getElementById('kpi-total');
+    const kpiEspecies = document.getElementById('kpi-especies');
+    const kpiProjetos = document.getElementById('kpi-projetos');
+    const kpiGps = document.getElementById('kpi-gps');
+
+    const dataInicio = document.getElementById('data-inicio');
+    const dataFim = document.getElementById('data-fim');
+    const projeto = document.getElementById('projeto');
+    const tipoRegistro = document.getElementById('tipo-registro');
+    const btnAplicar = document.getElementById('btn-aplicar');
+    const btnLimpar = document.getElementById('btn-limpar');
+
+    let registros = [];
+    let registrosFiltrados = [];
+
+    function parseDate(iso) {
+      if (!iso) return null;
+      const d = new Date(iso);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    function hasCoords(r) {
+      const lat = Number(r.latitude);
+      const lon = Number(r.longitude);
+      return Number.isFinite(lat) && Number.isFinite(lon);
+    }
+
+    function filtrarRegistros() {
+      const ini = dataInicio.value ? new Date(dataInicio.value) : null;
+      const fim = dataFim.value ? new Date(dataFim.value) : null;
+      if (fim) fim.setHours(23, 59, 59, 999);
+
+      const proj = projeto.value;
+      const tipo = (tipoRegistro.value || '').toLowerCase();
+
+      return registros.filter(r => {
+        if (proj && r.projeto !== proj) return false;
+
+        if (tipo) {
+          const rTipo = (r.tipo || '').toLowerCase();
+          if (rTipo !== tipo) return false;
+        }
+
+        if (ini || fim) {
+          const d = parseDate(r.data_registro);
+          if (d && ini && d < ini) return false;
+          if (d && fim && d > fim) return false;
+        }
+
+        return true;
+      });
+    }
+
+    function filtrarPorMapa(list) {
+      const bounds = map.getBounds();
+      return list.filter(r => {
+        if (!hasCoords(r)) return false;
+        const lat = Number(r.latitude);
+        const lon = Number(r.longitude);
+        return bounds.contains([lat, lon]);
+      });
+    }
+
+
+    function updateKpis(list) {
+      kpiTotal.textContent = list.length.toString();
+
+      const especiesSet = new Set();
+      const projetosSet = new Set();
+      let gpsCount = 0;
+
+      for (const r of list) {
+        const esp = (r.especie || r.identificacao || '').trim();
+        if (esp) especiesSet.add(esp);
+        if (r.projeto) projetosSet.add(r.projeto);
+        if (hasCoords(r)) gpsCount += 1;
+      }
+
+      kpiEspecies.textContent = especiesSet.size.toString();
+      kpiProjetos.textContent = projetosSet.size.toString();
+      kpiGps.textContent = gpsCount.toString();
+    }
+
+    const chartTipo = new Chart(document.getElementById('grafico-tipo'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Sem dados'],
+        datasets: [{
+          data: [1],
+          backgroundColor: ['#334155'],
+          borderWidth: 0,
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '75%',
+        plugins: {
+          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 6, font: {size: 10} } }
+        }
+      }
+    });
+
+    const chartProjeto = new Chart(document.getElementById('grafico-projeto'), {
+      type: 'bar',
+      data: {
+        labels: ['Sem dados'],
+        datasets: [{
+          label: 'Registros',
+          data: [0],
+          backgroundColor: '#334155',
+          hoverBackgroundColor: '#10b981',
+          borderRadius: 4,
+          barThickness: 12
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { x: { display: false }, y: { grid: { display: false } } },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    const chartData = new Chart(document.getElementById('grafico-data').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Registros',
+          data: [],
+          fill: true,
+          backgroundColor: 'rgba(16, 185, 129, 0.2)',
+          borderColor: '#10b981',
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        scales: {
+          y: { grid: { color: '#334155', drawBorder: false }, beginAtZero: true },
+          x: { grid: { display: false } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    function updateCharts(list) {
+      const tipoCounts = {};
+      const projetoCounts = {};
+
+      for (const r of list) {
+        const tipo = r.tipo || 'Indefinido';
+        tipoCounts[tipo] = (tipoCounts[tipo] || 0) + 1;
+
+        if (r.projeto) {
+          projetoCounts[r.projeto] = (projetoCounts[r.projeto] || 0) + 1;
+        }
+      }
+
+      const tipoLabels = Object.keys(tipoCounts);
+      const tipoValues = tipoLabels.map(l => tipoCounts[l]);
+      const tipoColors = ['#10b981', '#3b82f6', '#f59e0b', '#f472b6', '#a855f7', '#14b8a6'];
+
+      chartTipo.data.labels = tipoLabels.length ? tipoLabels : ['Sem dados'];
+      chartTipo.data.datasets[0].data = tipoLabels.length ? tipoValues : [1];
+      chartTipo.data.datasets[0].backgroundColor = tipoLabels.length
+        ? tipoLabels.map((_, i) => tipoColors[i % tipoColors.length])
+        : ['#334155'];
+      chartTipo.update();
+
+      const projetosOrdenados = Object.entries(projetoCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6);
+
+      if (projetosOrdenados.length) {
+        chartProjeto.data.labels = projetosOrdenados.map(([k]) => k);
+        chartProjeto.data.datasets[0].data = projetosOrdenados.map(([, v]) => v);
+        chartProjeto.data.datasets[0].backgroundColor = '#334155';
+        chartProjeto.data.datasets[0].hoverBackgroundColor = '#10b981';
+      } else {
+        chartProjeto.data.labels = ['Sem dados'];
+        chartProjeto.data.datasets[0].data = [0];
+        chartProjeto.data.datasets[0].backgroundColor = '#334155';
+      }
+      chartProjeto.update();
+
+      const now = new Date();
+      const labels = [];
+      const buckets = {};
+
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        buckets[key] = 0;
+        labels.push(d.toLocaleDateString('pt-BR', { month: 'short' }));
+      }
+
+      for (const r of list) {
+        const d = parseDate(r.data_registro);
+        if (!d) continue;
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        if (key in buckets) buckets[key] += 1;
+      }
+
+      chartData.data.labels = labels;
+      chartData.data.datasets[0].data = Object.values(buckets);
+      chartData.update();
+    }
+
+    function updateMap(list) {
+      markersLayer.clearLayers();
+      const points = [];
+
+      for (const r of list) {
+        if (!hasCoords(r)) continue;
+        const lat = Number(r.latitude);
+        const lon = Number(r.longitude);
+        const marker = L.circleMarker([lat, lon], {
+          radius: 5,
+          color: '#10b981',
+          fillColor: '#10b981',
+          fillOpacity: 0.85
+        });
+        marker.bindPopup(`
+          <div style="font-size:12px;">
+            <strong>${r.especie || r.identificacao || 'Registro'}</strong><br />
+            Projeto: ${r.projeto || '-'}<br />
+            Tipo: ${r.tipo || '-'}
+          </div>
+        `);
+        marker.addTo(markersLayer);
+        points.push([lat, lon]);
+      }
+
+      if (points.length) {
+        map.fitBounds(points, { padding: [40, 40] });
+      } else {
+        map.setView([-15.78, -47.93], 4);
+      }
+    }
+
+    function aplicarViewport() {
+      const visiveis = filtrarPorMapa(registrosFiltrados);
+      updateKpis(visiveis);
+      updateCharts(visiveis);
+    }
+
+    function aplicarTudo() {
+      registrosFiltrados = filtrarRegistros();
+      updateMap(registrosFiltrados);
+      aplicarViewport();
+    }
+
+    async function carregarRegistros() {
+      try {
+        const res = await fetch('/api/registros/');
+        if (!res.ok) throw new Error('Erro ao carregar registros');
+        registros = await res.json();
+        aplicarTudo();
+      } catch (err) {
+        console.error(err);
+        registros = [];
+        aplicarTudo();
+      }
+    }
+
+    btnAplicar.addEventListener('click', aplicarTudo);
+    btnLimpar.addEventListener('click', () => {
+      dataInicio.value = '';
+      dataFim.value = '';
+      projeto.value = '';
+      tipoRegistro.value = '';
+      aplicarTudo();
+    });
+
+    carregarRegistros();
+  </script>
+
+{% endblock %}

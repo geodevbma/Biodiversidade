@@ -1,0 +1,539 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login • Biodiversidade</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#22c55e",
+            ink: "#020617",
+          },
+          fontFamily: {
+            display: ['"Space Grotesk"', "ui-sans-serif", "system-ui"],
+            body: ['"Manrope"', "ui-sans-serif", "system-ui"],
+          },
+          boxShadow: {
+            glass: "0 24px 80px rgba(2, 6, 23, 0.70)",
+            neon: "0 0 42px rgba(34,197,94,0.38)",
+            soft: "0 18px 55px rgba(2, 6, 23, 0.55)",
+          },
+          keyframes: {
+            floaty: { "0%,100%": { transform:"translate3d(0,0,0)" }, "50%": { transform:"translate3d(0,-12px,0)" } },
+            drift:  { "0%": { transform:"translate3d(0,0,0) rotate(0deg)" }, "50%": { transform:"translate3d(18px,-10px,0) rotate(8deg)" }, "100%": { transform:"translate3d(0,0,0) rotate(0deg)" } },
+            shimmer:{ "0%,100%": { opacity:"0.12" }, "50%": { opacity:"0.45" } },
+            inUp:   { "0%": { opacity:"0", transform:"translate3d(0,18px,0)" }, "100%": { opacity:"1", transform:"translate3d(0,0,0)" } },
+            cardIn: { "0%": { opacity:"0", transform:"translate3d(0,28px,0) scale(.98)" }, "100%": { opacity:"1", transform:"translate3d(0,0,0) scale(1)" } },
+            pop:    { "0%": { transform:"scale(.98)" }, "60%": { transform:"scale(1.01)" }, "100%": { transform:"scale(1)" } },
+            toast:  { "0%": { opacity:"0", transform:"translate3d(0,12px,0)" }, "12%": { opacity:"1", transform:"translate3d(0,0,0)" }, "88%": { opacity:"1", transform:"translate3d(0,0,0)" }, "100%": { opacity:"0", transform:"translate3d(0,10px,0)" } },
+            glow:   { "0%,100%": { filter:"drop-shadow(0 0 0 rgba(34,197,94,0))" }, "50%": { filter:"drop-shadow(0 0 18px rgba(34,197,94,0.35))" } },
+          },
+          animation: {
+            floaty: "floaty 9s ease-in-out infinite",
+            drift: "drift 14s ease-in-out infinite",
+            shimmer: "shimmer 4.5s ease-in-out infinite",
+            inUp: "inUp .85s ease-out both",
+            cardIn: "cardIn .95s ease-out both",
+            pop: "pop .45s ease-out both",
+            toast: "toast 3.2s ease-in-out both",
+            glow: "glow 4.8s ease-in-out infinite",
+          }
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root{
+      --accent:#22c55e;
+      --accent2:#34d399;
+      --bg1:#0b1220;
+      --bg2:#020617;
+      --grid: rgba(148,163,184,.08);
+      --stroke: rgba(148,163,184,.18);
+      --panel: rgba(2,6,23,.72);
+    }
+
+    body{
+      min-height: 100vh;
+      background:
+        radial-gradient(1000px 600px at 12% 12%, rgba(34,197,94,.18), transparent 55%),
+        radial-gradient(900px 520px at 85% 8%, rgba(14,116,144,.20), transparent 55%),
+        radial-gradient(900px 620px at 80% 85%, rgba(99,102,241,.12), transparent 55%),
+        linear-gradient(155deg, var(--bg1), var(--bg2));
+    }
+
+    .bg-grid{
+      background-image:
+        linear-gradient(to right, var(--grid) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: radial-gradient(circle at 35% 35%, black 40%, transparent 72%);
+      opacity: .55;
+    }
+
+    .noise{
+      pointer-events:none;
+      position:fixed;
+      inset:0;
+      opacity:.07;
+      background-image:url("https://grainy-gradients.vercel.app/noise.svg");
+      mix-blend-mode:soft-light;
+      z-index:-1;
+    }
+
+    /* Tilt sutil com CSS vars */
+    .tilt{
+      transform:
+        perspective(1200px)
+        rotateX(var(--rx, 0deg))
+        rotateY(var(--ry, 0deg))
+        translate3d(0,0,0);
+      will-change: transform;
+    }
+
+    ::selection{ background: rgba(34,197,94,.28); color:#f8fafc; }
+
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{ animation:none !important; transition:none !important; scroll-behavior:auto !important; }
+      .spotlight{ display:none; }
+    }
+  </style>
+</head>
+
+<body class="h-full text-slate-100 antialiased font-body">
+  <div class="noise"></div>
+
+  <!-- Background layers -->
+  <div class="absolute inset-0 -z-10">
+    <div class="absolute inset-0 bg-grid"></div>
+
+    <!-- Animated blobs -->
+    <div class="absolute -top-28 left-6 h-72 w-72 rounded-full bg-emerald-500/12 blur-3xl animate-floaty"></div>
+    <div class="absolute top-24 right-6 h-80 w-80 rounded-full bg-cyan-500/10 blur-3xl animate-drift"></div>
+    <div class="absolute -bottom-40 left-1/3 h-96 w-96 rounded-full bg-indigo-500/10 blur-3xl animate-floaty [animation-delay:-3s]"></div>
+  </div>
+
+  <!-- Toast -->
+  <div class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[min(92vw,520px)] pointer-events-none">
+    <div id="toast" class="hidden rounded-2xl border border-slate-800/70 bg-slate-950/80 backdrop-blur-xl shadow-soft px-4 py-3">
+      <div class="flex items-start gap-3">
+        <div class="mt-0.5 h-9 w-9 rounded-xl bg-emerald-500/15 border border-emerald-500/35 flex items-center justify-center">
+          <span class="text-emerald-300 font-semibold">BIO</span>
+        </div>
+        <div class="flex-1">
+          <p id="toastTitle" class="text-sm font-semibold">Aviso</p>
+          <p id="toastMsg" class="text-xs text-slate-300/85 mt-0.5">Mensagem</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="relative min-h-screen flex items-center justify-center px-4 py-12">
+    <div class="w-full max-w-6xl grid lg:grid-cols-[1.05fr_0.95fr] gap-10 items-center">
+
+      <!-- Left / Copy -->
+      <section class="order-2 lg:order-1 space-y-8 animate-inUp">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30">
+          <span class="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-xs uppercase tracking-[0.28em] text-emerald-200">Sistema de Biodiversidade</span>
+        </div>
+
+        <div class="space-y-4">
+          <h1 class="text-3xl md:text-4xl lg:text-5xl font-display font-semibold leading-tight">
+            Login do escritório para análise e gestão de dados de campo.
+          </h1>
+          <p class="text-sm md:text-base text-slate-300/85 max-w-xl">
+            Acesse levantamentos, mapas, indicadores e histórico de coletas.
+            Sessões auditáveis, controle de permissões e integração com o app de campo.
+          </p>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="rounded-2xl border border-slate-800/70 bg-slate-950/55 p-4 backdrop-blur-sm">
+            <p class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Operação</p>
+            <p class="text-base font-semibold text-slate-100">Fluxos auditáveis</p>
+            <p class="text-xs text-slate-400">Checklists, validações e rastreio.</p>
+          </div>
+          <div class="rounded-2xl border border-slate-800/70 bg-slate-950/55 p-4 backdrop-blur-sm">
+            <p class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Gestão</p>
+            <p class="text-base font-semibold text-slate-100">Visão unificada</p>
+            <p class="text-xs text-slate-400">Painéis e camadas geográficas.</p>
+          </div>
+          <div class="rounded-2xl border border-slate-800/70 bg-slate-950/55 p-4 backdrop-blur-sm">
+            <p class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Segurança</p>
+            <p class="text-base font-semibold text-slate-100">Acesso controlado</p>
+            <p class="text-xs text-slate-400">Perfis, logs e expiração.</p>
+          </div>
+          <div class="rounded-2xl border border-slate-800/70 bg-slate-950/55 p-4 backdrop-blur-sm">
+            <p class="text-[11px] uppercase tracking-[0.2em] text-slate-400">Integração</p>
+            <p class="text-base font-semibold text-slate-100">App de campo</p>
+            <p class="text-xs text-slate-400">Sincronização e revisão.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3 text-xs text-slate-300/70">
+          <span class="px-3 py-1 rounded-full border border-slate-800/70 bg-slate-950/60">Dashboards e alertas</span>
+          <span class="px-3 py-1 rounded-full border border-slate-800/70 bg-slate-950/60">Controle de colaboradores</span>
+          <span class="px-3 py-1 rounded-full border border-slate-800/70 bg-slate-950/60">Histórico de coletas</span>
+        </div>
+      </section>
+
+      <!-- Right / Card -->
+      <section class="order-1 lg:order-2 animate-cardIn" style="animation-delay: 120ms;">
+        <div class="relative tilt" id="tiltCard">
+          <!-- Outer aura -->
+          <div class="absolute -inset-[2px] rounded-[2rem] bg-gradient-to-tr from-emerald-500/40 via-emerald-300/10 to-transparent blur-xl opacity-70"></div>
+
+          <div class="relative rounded-[2rem] bg-slate-950/75 border border-slate-800/80 shadow-glass backdrop-blur-xl p-7 md:p-8 overflow-hidden">
+            <!-- Top shimmer -->
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl animate-shimmer"></div>
+            <div class="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
+
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Acesso restrito</p>
+                <h2 class="text-xl font-display font-semibold mt-1">Login do escritório</h2>
+              </div>
+              <div class="h-11 w-11 rounded-2xl bg-emerald-500/15 flex items-center justify-center border border-emerald-500/35 animate-glow">
+                <span class="text-lg font-semibold text-emerald-300">BIO</span>
+              </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="mt-5 h-px bg-gradient-to-r from-transparent via-slate-800/80 to-transparent"></div>
+
+            <form id="loginForm" class="mt-5 space-y-4" novalidate>
+              <!-- Email -->
+              <div class="space-y-1.5">
+                <label for="email" class="text-xs font-medium text-slate-300">E-mail</label>
+                <div class="relative group">
+                  <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-500 text-sm">@</span>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    inputmode="email"
+                    autocomplete="username"
+                    required
+                    class="w-full pl-9 pr-10 py-3 rounded-xl bg-slate-900/70 border border-slate-700/70 text-sm
+                           outline-none transition-all duration-200
+                           focus:bg-slate-900 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/35"
+                    placeholder="voce@empresa.com"
+                    aria-describedby="emailHint"
+                  />
+                  <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-emerald-300 transition" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 8l8 5 8-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M6 19h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <p id="emailHint" class="text-[11px] text-slate-400">Use seu e-mail corporativo cadastrado.</p>
+              </div>
+
+              <!-- Password -->
+              <div class="space-y-1.5">
+                <label for="senha" class="text-xs font-medium text-slate-300">Senha</label>
+                <div class="relative group">
+                  <input
+                    id="senha"
+                    name="senha"
+                    type="password"
+                    autocomplete="current-password"
+                    required
+                    minlength="6"
+                    class="w-full pl-3 pr-24 py-3 rounded-xl bg-slate-900/70 border border-slate-700/70 text-sm
+                           outline-none transition-all duration-200
+                           focus:bg-slate-900 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/35"
+                    placeholder="••••••••"
+                  />
+
+                  <button
+                    id="togglePassword"
+                    type="button"
+                    class="absolute inset-y-0 right-2 my-1 px-2.5 rounded-lg text-[11px] font-semibold text-slate-300
+                           border border-slate-700/70 bg-slate-950/60 hover:border-emerald-400 hover:text-emerald-300 transition"
+                    aria-pressed="false"
+                    aria-label="Mostrar senha"
+                  >Mostrar</button>
+
+                  <div class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 opacity-0 group-focus-within:opacity-100 transition">
+                    <div class="h-2 w-2 rounded-full bg-emerald-400/70 shadow-neon"></div>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
+                  <span class="inline-flex items-center gap-2">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                    Sessões monitoradas e registradas.
+                  </span>
+                  <button type="button" id="forgotBtn" class="text-slate-400 hover:text-emerald-300 transition underline decoration-slate-700 hover:decoration-emerald-500/50">
+                    Esqueci minha senha
+                  </button>
+                </div>
+              </div>
+
+              <!-- Error -->
+              <div
+                id="errorBox"
+                class="hidden text-xs text-rose-200 bg-rose-500/10 border border-rose-500/35 rounded-xl px-3 py-2"
+                role="alert"
+                aria-live="polite"
+              >Credenciais inválidas. Verifique e tente novamente.</div>
+
+              <!-- Submit -->
+              <button
+                id="submitBtn"
+                type="submit"
+                class="relative w-full rounded-xl bg-emerald-500 text-slate-950 text-sm font-semibold py-3
+                       transition-all duration-200
+                       hover:bg-emerald-400 hover:shadow-neon
+                       active:translate-y-[1px]
+                       focus:outline-none focus:ring-2 focus:ring-emerald-400/60 focus:ring-offset-2 focus:ring-offset-slate-950
+                       overflow-hidden"
+              >
+                <!-- magnetic sheen -->
+                <span class="absolute inset-0 opacity-0 transition-opacity duration-200" id="btnSheen"
+                  style="background: radial-gradient(420px 140px at var(--bx, 50%) var(--by, 50%), rgba(255,255,255,.35), transparent 55%);">
+                </span>
+
+                <span class="relative inline-flex items-center justify-center gap-2">
+                  <span id="submitText">Entrar</span>
+
+                  <svg id="submitIcon" class="w-4 h-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <path d="M5 10h10M11 6l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+
+                  <svg id="submitSpinner" class="w-4 h-4 animate-spin hidden" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                </span>
+              </button>
+
+              <div class="text-[11px] text-slate-400/85 text-center pt-1">
+                Acesso gerenciado pela coordenação. Dúvidas? Contate o administrador.
+              </div>
+            </form>
+
+            <!-- Footer micro -->
+            <div class="mt-6 pt-5 border-t border-slate-800/70">
+              <div class="flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-400">
+                <span class="inline-flex items-center gap-2">
+                  <span class="h-2 w-2 rounded-full bg-emerald-400/70"></span>
+                  Conexão segura e criptografada
+                </span>
+                <span class="text-slate-500">v2.0 • Biodiversidade</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    // ============== Helpers / State ==============
+    const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const form = document.getElementById("loginForm");
+    const emailInput = document.getElementById("email");
+    const senhaInput = document.getElementById("senha");
+
+    const errorBox = document.getElementById("errorBox");
+    const submitBtn = document.getElementById("submitBtn");
+    const submitText = document.getElementById("submitText");
+    const submitIcon = document.getElementById("submitIcon");
+    const submitSpinner = document.getElementById("submitSpinner");
+
+    const togglePassword = document.getElementById("togglePassword");
+    const forgotBtn = document.getElementById("forgotBtn");
+
+    const tiltCard = document.getElementById("tiltCard");
+
+    const toast = document.getElementById("toast");
+    const toastTitle = document.getElementById("toastTitle");
+    const toastMsg = document.getElementById("toastMsg");
+
+    function showToast(title, message) {
+      toastTitle.textContent = title;
+      toastMsg.textContent = message;
+      toast.classList.remove("hidden");
+      toast.classList.remove("animate-toast");
+      // force reflow
+      void toast.offsetWidth;
+      toast.classList.add("animate-toast");
+      setTimeout(() => toast.classList.add("hidden"), 3200);
+    }
+
+    function setLoadingState(isLoading) {
+      if (isLoading) {
+        errorBox.classList.add("hidden");
+        submitBtn.disabled = true;
+        submitBtn.classList.add("opacity-75", "cursor-not-allowed");
+        submitText.textContent = "Entrando...";
+        submitIcon.classList.add("hidden");
+        submitSpinner.classList.remove("hidden");
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove("opacity-75", "cursor-not-allowed");
+        submitText.textContent = "Entrar";
+        submitIcon.classList.remove("hidden");
+        submitSpinner.classList.add("hidden");
+      }
+    }
+
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function markInvalid(el, msg) {
+      el.classList.add("border-rose-500/50", "focus:border-rose-400");
+      el.classList.remove("border-slate-700/70");
+      el.setAttribute("aria-invalid", "true");
+      if (msg) showToast("Verifique os dados", msg);
+      // micro shake
+      if (!prefersReduced) {
+        el.classList.remove("animate-pop");
+        void el.offsetWidth;
+        el.classList.add("animate-pop");
+      }
+    }
+
+    function clearInvalid(el) {
+      el.classList.remove("border-rose-500/50", "focus:border-rose-400");
+      el.classList.add("border-slate-700/70");
+      el.removeAttribute("aria-invalid");
+    }
+
+    // ============== Password toggle ==============
+    togglePassword.addEventListener("click", () => {
+      const isPassword = senhaInput.type === "password";
+      senhaInput.type = isPassword ? "text" : "password";
+      togglePassword.setAttribute("aria-pressed", String(isPassword));
+      togglePassword.textContent = isPassword ? "Ocultar" : "Mostrar";
+      togglePassword.setAttribute("aria-label", isPassword ? "Ocultar senha" : "Mostrar senha");
+    });
+
+    // ============== Input behavior ==============
+    form.addEventListener("input", () => {
+      errorBox.classList.add("hidden");
+      clearInvalid(emailInput);
+      clearInvalid(senhaInput);
+    });
+
+    forgotBtn.addEventListener("click", () => {
+      showToast("Recuperação de acesso", "Fale com o administrador para redefinição de senha.");
+    });
+
+
+
+    // ============== Tilt card (pointer-based) ==============
+    if (!prefersReduced) {
+      const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+      tiltCard.addEventListener("pointermove", (e) => {
+        const rect = tiltCard.getBoundingClientRect();
+        const px = (e.clientX - rect.left) / rect.width;  // 0..1
+        const py = (e.clientY - rect.top) / rect.height;  // 0..1
+
+        const ry = clamp((px - 0.5) * 10, -6, 6);
+        const rx = clamp((0.5 - py) * 10, -6, 6);
+
+        tiltCard.style.setProperty("--rx", rx.toFixed(2) + "deg");
+        tiltCard.style.setProperty("--ry", ry.toFixed(2) + "deg");
+      });
+
+      tiltCard.addEventListener("pointerleave", () => {
+        tiltCard.style.setProperty("--rx", "0deg");
+        tiltCard.style.setProperty("--ry", "0deg");
+      });
+    }
+
+    // ============== Magnetic sheen on button ==============
+    const btnSheen = document.getElementById("btnSheen");
+    if (!prefersReduced) {
+      submitBtn.addEventListener("pointermove", (e) => {
+        const r = submitBtn.getBoundingClientRect();
+        const bx = ((e.clientX - r.left) / r.width) * 100;
+        const by = ((e.clientY - r.top) / r.height) * 100;
+        btnSheen.style.setProperty("--bx", bx + "%");
+        btnSheen.style.setProperty("--by", by + "%");
+        btnSheen.style.opacity = "1";
+      });
+      submitBtn.addEventListener("pointerleave", () => {
+        btnSheen.style.opacity = "0";
+      });
+    }
+
+    // ============== Submit / Auth ==============
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorBox.classList.add("hidden");
+
+      const email = emailInput.value.trim();
+      const senha = senhaInput.value;
+
+      // Client-side validation (UX)
+      let ok = true;
+      if (!email || !isValidEmail(email)) {
+        markInvalid(emailInput, "Informe um e-mail válido.");
+        ok = false;
+      }
+      if (!senha || senha.length < 6) {
+        markInvalid(senhaInput, "A senha deve ter pelo menos 6 caracteres.");
+        ok = false;
+      }
+      if (!ok) return;
+
+      setLoadingState(true);
+
+      // Delay mínimo (UX)
+      const delay = new Promise((resolve) => setTimeout(resolve, 900));
+
+      try {
+        const fetchPromise = fetch("/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, senha }),
+        });
+
+        const [res] = await Promise.all([fetchPromise, delay]);
+
+        if (!res.ok) {
+          errorBox.classList.remove("hidden");
+          showToast("Falha no login", "Credenciais inválidas ou acesso não autorizado.");
+          setLoadingState(false);
+          return;
+        }
+
+        // sucesso (cookie/sessão)
+        showToast("Bem-vindo", "Redirecionando para o painel…");
+        if (!prefersReduced) {
+          submitBtn.classList.add("animate-pop");
+        }
+
+        setTimeout(() => {
+          window.location.href = "/admin/dashboard";
+        }, 600);
+
+      } catch (err) {
+        console.error(err);
+        errorBox.classList.remove("hidden");
+        showToast("Erro de rede", "Não foi possível conectar ao servidor. Tente novamente.");
+        setLoadingState(false);
+      }
+    });
+  </script>
+</body>
+</html>

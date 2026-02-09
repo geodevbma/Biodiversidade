@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}Biodiversidade{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#22c55e",
+            dark: "#020617",
+          },
+          boxShadow: {
+            neon: "0 0 40px rgba(34,197,94,0.45)",
+          },
+          keyframes: {
+            fadeUp: {
+              "0%": { opacity: 0, transform: "translateY(15px) scale(0.98)" },
+              "100%": { opacity: 1, transform: "translateY(0) scale(1)" },
+            },
+            slideIn: {
+              "0%": { opacity: 0, transform: "translateY(10px)" },
+              "100%": { opacity: 1, transform: "translateY(0)" },
+            },
+          },
+          animation: {
+            fadeUp: "fadeUp 0.5s ease-out forwards",
+            slideIn: "slideIn 0.3s ease-out forwards",
+          },
+        },
+      },
+    };
+  </script>
+
+  <script>
+    (function () {
+      const defaults = {
+        theme: "verde",
+        font: "md",
+        motion: "full",
+        noise: "on",
+        density: "comfortable",
+      };
+      let settings = { ...defaults };
+      try {
+        const raw = localStorage.getItem("ui_settings");
+        if (raw) settings = { ...settings, ...JSON.parse(raw) };
+      } catch (_) {
+        // Ignora erros de parsing.
+      }
+
+      window.__uiSettingsDefaults = defaults;
+      window.applyUiSettings = function (data) {
+        const root = document.documentElement;
+        root.dataset.theme = data.theme || defaults.theme;
+        root.dataset.font = data.font || defaults.font;
+        root.dataset.motion = data.motion || defaults.motion;
+        root.dataset.noise = data.noise || defaults.noise;
+        root.dataset.density = data.density || defaults.density;
+      };
+
+      window.applyUiSettings(settings);
+    })();
+  </script>
+
+  <style>
+    :root {
+      --accent-strong: #22c55e;
+      --accent-hover: #34d399;
+      --accent-text: #86efac;
+      --accent-border-40: rgba(34, 197, 94, 0.4);
+      --accent-border-30: rgba(34, 197, 94, 0.3);
+      --accent-border-50: rgba(34, 197, 94, 0.5);
+      --accent-soft-10: rgba(34, 197, 94, 0.1);
+      --accent-soft-15: rgba(34, 197, 94, 0.15);
+      --accent-soft-20: rgba(34, 197, 94, 0.2);
+      --accent-soft-30: rgba(34, 197, 94, 0.3);
+      --accent-soft-40: rgba(34, 197, 94, 0.4);
+      --accent-soft-50: rgba(34, 197, 94, 0.5);
+      --accent-soft-80: rgba(34, 197, 94, 0.8);
+      --accent-shadow: rgba(34, 197, 94, 0.2);
+      --accent-glow: 0 0 40px rgba(34, 197, 94, 0.45);
+      --bg-top: #22c55e22;
+      --bg-bottom: #020617;
+      --bg-soft: #22c55e11;
+    }
+    html[data-theme="azul"] {
+      --accent-strong: #38bdf8;
+      --accent-hover: #60a5fa;
+      --accent-text: #93c5fd;
+      --accent-border-40: rgba(56, 189, 248, 0.4);
+      --accent-border-30: rgba(56, 189, 248, 0.3);
+      --accent-border-50: rgba(56, 189, 248, 0.5);
+      --accent-soft-10: rgba(56, 189, 248, 0.1);
+      --accent-soft-15: rgba(56, 189, 248, 0.15);
+      --accent-soft-20: rgba(56, 189, 248, 0.2);
+      --accent-soft-30: rgba(56, 189, 248, 0.3);
+      --accent-soft-40: rgba(56, 189, 248, 0.4);
+      --accent-soft-50: rgba(56, 189, 248, 0.5);
+      --accent-soft-80: rgba(56, 189, 248, 0.8);
+      --accent-shadow: rgba(56, 189, 248, 0.2);
+      --accent-glow: 0 0 40px rgba(56, 189, 248, 0.45);
+      --bg-top: #38bdf822;
+      --bg-bottom: #0b1220;
+      --bg-soft: #38bdf811;
+    }
+    html[data-theme="ambar"] {
+      --accent-strong: #f59e0b;
+      --accent-hover: #fbbf24;
+      --accent-text: #fcd34d;
+      --accent-border-40: rgba(245, 158, 11, 0.4);
+      --accent-border-30: rgba(245, 158, 11, 0.3);
+      --accent-border-50: rgba(245, 158, 11, 0.5);
+      --accent-soft-10: rgba(245, 158, 11, 0.1);
+      --accent-soft-15: rgba(245, 158, 11, 0.15);
+      --accent-soft-20: rgba(245, 158, 11, 0.2);
+      --accent-soft-30: rgba(245, 158, 11, 0.3);
+      --accent-soft-40: rgba(245, 158, 11, 0.4);
+      --accent-soft-50: rgba(245, 158, 11, 0.5);
+      --accent-soft-80: rgba(245, 158, 11, 0.8);
+      --accent-shadow: rgba(245, 158, 11, 0.2);
+      --accent-glow: 0 0 40px rgba(245, 158, 11, 0.45);
+      --bg-top: #f59e0b22;
+      --bg-bottom: #1a1205;
+      --bg-soft: #f59e0b11;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, var(--bg-top), transparent 60%),
+        radial-gradient(circle at bottom, var(--bg-soft), var(--bg-bottom));
+    }
+
+    html[data-font="sm"] { font-size: 93%; }
+    html[data-font="lg"] { font-size: 106%; }
+
+    html[data-motion="reduced"] *, 
+    html[data-motion="reduced"] *::before, 
+    html[data-motion="reduced"] *::after {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+    html[data-noise="off"] .noise {
+      display: none;
+    }
+    html[data-density="compact"] main {
+      padding: 12px !important;
+    }
+    html[data-density="compact"] table th,
+    html[data-density="compact"] table td {
+      padding-top: 0.4rem !important;
+      padding-bottom: 0.4rem !important;
+    }
+
+    .bg-emerald-500 { background-color: var(--accent-strong) !important; }
+    .bg-emerald-400 { background-color: var(--accent-hover) !important; }
+    .bg-emerald-500\/10 { background-color: var(--accent-soft-10) !important; }
+    .bg-emerald-500\/15 { background-color: var(--accent-soft-15) !important; }
+    .bg-emerald-500\/20 { background-color: var(--accent-soft-20) !important; }
+    .bg-emerald-500\/40 { background-color: var(--accent-soft-40) !important; }
+    .bg-emerald-500\/80 { background-color: var(--accent-soft-80) !important; }
+    .bg-emerald-900\/30 { background-color: rgba(2, 6, 23, 0.35) !important; }
+
+    .text-emerald-300 { color: var(--accent-text) !important; }
+    .text-emerald-400 { color: var(--accent-hover) !important; }
+    .text-emerald-500 { color: var(--accent-strong) !important; }
+
+    .border-emerald-500\/30 { border-color: var(--accent-border-30) !important; }
+    .border-emerald-500\/40 { border-color: var(--accent-border-40) !important; }
+    .border-emerald-500\/50 { border-color: var(--accent-border-50) !important; }
+
+    .focus\:border-emerald-400:focus { border-color: var(--accent-hover) !important; }
+    .hover\:border-emerald-400:hover { border-color: var(--accent-hover) !important; }
+    .focus\:ring-emerald-500\/30:focus { --tw-ring-color: var(--accent-soft-30) !important; }
+    .focus\:ring-emerald-500\/40:focus { --tw-ring-color: var(--accent-soft-40) !important; }
+    .hover\:bg-emerald-400:hover { background-color: var(--accent-hover) !important; }
+    .hover\:text-emerald-300:hover { color: var(--accent-text) !important; }
+    .group:hover .group-hover\:bg-emerald-500\/10 { background-color: var(--accent-soft-10) !important; }
+    .shadow-neon { box-shadow: var(--accent-glow) !important; }
+    .shadow-emerald-500\/20 { --tw-shadow-color: var(--accent-shadow) !important; }
+
+    .from-emerald-500\/40 { --tw-gradient-from: var(--accent-soft-40) !important; --tw-gradient-to: var(--accent-soft-40) !important; }
+    .from-emerald-500\/50 { --tw-gradient-from: var(--accent-soft-50) !important; --tw-gradient-to: var(--accent-soft-50) !important; }
+    .via-emerald-400\/10 { --tw-gradient-stops: var(--tw-gradient-from), var(--accent-soft-10), var(--tw-gradient-to) !important; }
+    .via-emerald-400\/20 { --tw-gradient-stops: var(--tw-gradient-from), var(--accent-soft-20), var(--tw-gradient-to) !important; }
+
+    .noise {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      opacity: 0.08;
+      background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+      mix-blend-mode: soft-light;
+      z-index: -1;
+    }
+
+    /* Scrollbar discreta */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.8);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full text-slate-100">
+  <div class="noise"></div>
+
+  <div class="min-h-screen flex">
+
+    <!-- SIDEBAR (desktop) -->
+    <aside
+      class="hidden md:flex md:flex-col w-64 bg-slate-950/85 border-r border-slate-800/80 backdrop-blur-xl"
+    >
+      <div class="px-6 py-5 border-b border-slate-800/80 flex items-center gap-3">
+        <div class="h-9 w-9 rounded-2xl bg-emerald-500/80 flex items-center justify-center text-slate-950 font-bold text-lg">
+          BIO
+        </div>
+        <div>
+          <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Painel</p>
+          <p class="text-sm font-semibold">Biodiversidade</p>
+        </div>
+      </div>
+
+      <nav class="flex-1 px-3 py-4 text-sm space-y-1">
+  <a
+    href="/admin/dashboard"
+    class="flex items-center gap-2 px-3 py-2 rounded-xl
+           {% if active_menu == 'dashboard' %}bg-emerald-500/10 text-emerald-300 border border-emerald-500/40{% else %}
+           text-slate-300 hover:bg-slate-900/70{% endif %}"
+  >
+    <span>Visão geral</span>
+  </a>
+
+  <a
+    href="/admin/colaboradores"
+    class="flex items-center gap-2 px-3 py-2 rounded-xl
+           {% if active_menu == 'colaboradores' %}bg-emerald-500/10 text-emerald-300 border border-emerald-500/40{% else %}
+           text-slate-300 hover:bg-slate-900/70{% endif %}"
+  >
+    <span>Colaboradores de campo</span>
+  </a>
+
+  <a
+    href="/admin/registros"
+    class="flex items-center gap-2 px-3 py-2 rounded-xl
+           {% if active_menu == 'registros' %}bg-emerald-500/10 text-emerald-300 border border-emerald-500/40{% else %}
+           text-slate-300 hover:bg-slate-900/70{% endif %}"
+  >
+    <span>Registros coletados</span>
+  </a>
+
+  <a
+    href="/admin/registros-fauna"
+    class="flex items-center gap-2 px-3 py-2 rounded-xl
+           {% if active_menu == 'registros_fauna' %}bg-emerald-500/10 text-emerald-300 border border-emerald-500/40{% else %}
+           text-slate-300 hover:bg-slate-900/70{% endif %}"
+  >
+    <span>Registros coletados - Fauna</span>
+  </a>
+
+        {# Espaço para futuros módulos #}
+        {# 
+        <a href="/admin/levantamentos" ...>Levantamentos</a>
+        <a href="/admin/mapa" ...>Mapa</a>
+        #}
+      </nav>
+
+      <div class="px-3 pb-4">
+        <a
+          href="/admin/configuracoes"
+          class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm
+                 {% if active_menu == 'configuracoes' %}bg-emerald-500/10 text-emerald-300 border border-emerald-500/40{% else %}
+                 text-slate-300 hover:bg-slate-900/70{% endif %}"
+        >
+          <span>Configurações</span>
+        </a>
+      </div>
+
+      <div class="px-4 py-4 border-t border-slate-800/80 text-xs text-slate-400">
+        Sistema de Biodiversidade<br />
+        <span class="text-slate-500">Portal do escritório</span>
+      </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="flex-1 flex flex-col min-h-screen">
+
+      <!-- TOPBAR -->
+      <header
+        class="h-14 md:h-16 px-4 md:px-6 flex items-center justify-between border-b border-slate-800/80 bg-slate-950/75 backdrop-blur-xl"
+      >
+        <!-- Menu mobile + título página -->
+        <div class="flex items-center gap-3">
+          <!-- Botão menu mobile (se quiser implementar depois) -->
+          <!--
+          <button id="btnMenu" class="md:hidden p-1.5 rounded-lg bg-slate-900 border border-slate-700">
+            <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none">
+              <path d="M3 6h14M3 10h14M3 14h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </button>
+          -->
+
+          <div>
+            <p class="text-sm md:text-base font-semibold">
+              {% block header_title %}{% endblock %}
+            </p>
+            {% block header_subtitle %}
+            {% if user %}
+              <p class="text-[11px] text-slate-400">
+                Logado como <span class="text-emerald-300">{{ user.nome }}</span>
+              </p>
+            {% endif %}
+            {% endblock %}
+          </div>
+        </div>
+
+        <!-- Informações do usuário / ações -->
+        <div class="flex items-center gap-4 text-xs">
+          {% if user %}
+            <div class="hidden md:flex flex-col items-end text-right">
+              <span class="font-medium text-slate-200">{{ user.nome }}</span>
+              <span class="text-[11px] text-slate-400">{{ user.email }}</span>
+            </div>
+          {% endif %}
+
+          <form action="/auth/logout" method="post">
+            <button
+              type="submit"
+              class="px-3 py-1.5 rounded-lg border border-slate-700/80 text-slate-300 text-xs
+                     hover:bg-slate-900/80 transition"
+            >
+              Sair
+            </button>
+          </form>
+        </div>
+      </header>
+
+      <!-- CONTEÚDO DA PÁGINA -->
+      <main class="flex-1 px-3 md:px-6 py-4 md:py-6 relative">
+        <div class="max-w-6xl mx-auto animate-fadeUp">
+          {% block content %}{% endblock %}
+        </div>
+      </main>
+    </div>
+  </div>
+  {% block modals %}{% endblock %}
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

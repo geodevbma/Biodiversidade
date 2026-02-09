@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Configurações • Biodiversidade{% endblock %}
+
+{% block header_title %}
+Configurações
+{% endblock %}
+
+{% block header_subtitle %}
+<p class="text-[11px] text-slate-400">
+  Preferências salvas somente neste navegador.
+</p>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <div>
+    <h1 class="text-xl md:text-2xl font-semibold">Preferências do usuário</h1>
+    <p class="text-sm text-slate-300/80">
+      Ajuste aparência e comportamento do painel.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <section class="lg:col-span-2 rounded-3xl bg-slate-950/85 border border-slate-800/80 backdrop-blur-xl p-5 md:p-6 space-y-5">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-semibold">Aparência</h2>
+          <p class="text-xs text-slate-400">Escolha tema, densidade e fonte.</p>
+        </div>
+        <button
+          id="btnReset"
+          class="px-3 py-1.5 rounded-lg border border-slate-700/80 text-xs text-slate-300 hover:bg-slate-900/80"
+        >
+          Restaurar padrão
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <p class="text-xs text-slate-400 uppercase tracking-[0.2em]">Tema</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <label class="cursor-pointer rounded-2xl border border-slate-800/80 bg-slate-950/70 p-3 hover:border-emerald-400 transition">
+            <input type="radio" name="theme" value="verde" class="hidden" />
+            <div class="flex items-center gap-3">
+              <span class="h-10 w-10 rounded-xl" style="background: linear-gradient(135deg, #22c55e, #0f172a);"></span>
+              <div>
+                <p class="text-sm font-medium">Verde</p>
+                <p class="text-[11px] text-slate-400">Padrão do painel</p>
+              </div>
+            </div>
+          </label>
+          <label class="cursor-pointer rounded-2xl border border-slate-800/80 bg-slate-950/70 p-3 hover:border-emerald-400 transition">
+            <input type="radio" name="theme" value="azul" class="hidden" />
+            <div class="flex items-center gap-3">
+              <span class="h-10 w-10 rounded-xl" style="background: linear-gradient(135deg, #38bdf8, #0b1220);"></span>
+              <div>
+                <p class="text-sm font-medium">Azul profundo</p>
+                <p class="text-[11px] text-slate-400">Mais frio e técnico</p>
+              </div>
+            </div>
+          </label>
+          <label class="cursor-pointer rounded-2xl border border-slate-800/80 bg-slate-950/70 p-3 hover:border-emerald-400 transition">
+            <input type="radio" name="theme" value="ambar" class="hidden" />
+            <div class="flex items-center gap-3">
+              <span class="h-10 w-10 rounded-xl" style="background: linear-gradient(135deg, #f59e0b, #1a1205);"></span>
+              <div>
+                <p class="text-sm font-medium">Âmbar</p>
+                <p class="text-[11px] text-slate-400">Energia quente</p>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-2">
+          <label class="text-xs text-slate-400 uppercase tracking-[0.2em]">Tamanho da fonte</label>
+          <select
+            id="fontSelect"
+            class="w-full px-3 py-2 rounded-xl bg-slate-950/70 border border-slate-700/80 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30"
+          >
+            <option value="sm">Pequena</option>
+            <option value="md">Padrão</option>
+            <option value="lg">Grande</option>
+          </select>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-xs text-slate-400 uppercase tracking-[0.2em]">Densidade</label>
+          <select
+            id="densitySelect"
+            class="w-full px-3 py-2 rounded-xl bg-slate-950/70 border border-slate-700/80 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30"
+          >
+            <option value="comfortable">Confortável</option>
+            <option value="compact">Compacta</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <label class="flex items-center justify-between gap-3 rounded-2xl border border-slate-800/80 bg-slate-950/70 p-3">
+          <div>
+            <p class="text-sm font-medium">Reduzir animações</p>
+            <p class="text-[11px] text-slate-400">Desativa transições e efeitos.</p>
+          </div>
+          <input id="motionToggle" type="checkbox" class="rounded border-slate-600 bg-slate-900 text-emerald-500" />
+        </label>
+
+        <label class="flex items-center justify-between gap-3 rounded-2xl border border-slate-800/80 bg-slate-950/70 p-3">
+          <div>
+            <p class="text-sm font-medium">Efeito granulado</p>
+            <p class="text-[11px] text-slate-400">Exibe ruído sutil no fundo.</p>
+          </div>
+          <input id="noiseToggle" type="checkbox" class="rounded border-slate-600 bg-slate-900 text-emerald-500" />
+        </label>
+      </div>
+
+      <p id="saveStatus" class="hidden text-xs text-emerald-300">
+        Preferências salvas.
+      </p>
+    </section>
+
+    <aside class="rounded-3xl bg-slate-950/85 border border-slate-800/80 backdrop-blur-xl p-5 md:p-6 space-y-4">
+      <div>
+        <h2 class="text-base font-semibold">Sugestões futuras</h2>
+        <p class="text-xs text-slate-400">Ideias para evoluir o painel.</p>
+      </div>
+      <ul class="text-xs text-slate-300 space-y-2">
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-300">•</span>
+          Modo offline no painel web.
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-300">•</span>
+          Notificações quando colaborador expirar.
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-300">•</span>
+          Exportação rápida CSV/Excel.
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-300">•</span>
+          Perfis de acesso por projeto.
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-emerald-300">•</span>
+          Idioma e formato de data personalizável.
+        </li>
+      </ul>
+    </aside>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const storageKey = "ui_settings";
+  const defaults = window.__uiSettingsDefaults || {
+    theme: "verde",
+    font: "md",
+    motion: "full",
+    noise: "on",
+    density: "comfortable",
+  };
+
+  const statusEl = document.getElementById("saveStatus");
+  const fontSelect = document.getElementById("fontSelect");
+  const densitySelect = document.getElementById("densitySelect");
+  const motionToggle = document.getElementById("motionToggle");
+  const noiseToggle = document.getElementById("noiseToggle");
+  const themeInputs = Array.from(document.querySelectorAll("input[name='theme']"));
+  const btnReset = document.getElementById("btnReset");
+
+  function loadSettings() {
+    let data = { ...defaults };
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) data = { ...data, ...JSON.parse(raw) };
+    } catch (_) {
+      // Ignora erros de parsing.
+    }
+    return data;
+  }
+
+  function saveSettings(data) {
+    localStorage.setItem(storageKey, JSON.stringify(data));
+    if (window.applyUiSettings) {
+      window.applyUiSettings(data);
+    }
+    if (statusEl) {
+      statusEl.classList.remove("hidden");
+      clearTimeout(window.__saveStatusTimer);
+      window.__saveStatusTimer = setTimeout(() => {
+        statusEl.classList.add("hidden");
+      }, 1800);
+    }
+  }
+
+  function applyToControls(data) {
+    themeInputs.forEach((input) => {
+      input.checked = input.value === data.theme;
+      input.parentElement?.classList.toggle("border-emerald-400", input.checked);
+    });
+    fontSelect.value = data.font;
+    densitySelect.value = data.density;
+    motionToggle.checked = data.motion === "reduced";
+    noiseToggle.checked = data.noise !== "off";
+  }
+
+  function currentState() {
+    const theme = themeInputs.find((input) => input.checked)?.value || defaults.theme;
+    return {
+      theme,
+      font: fontSelect.value,
+      density: densitySelect.value,
+      motion: motionToggle.checked ? "reduced" : "full",
+      noise: noiseToggle.checked ? "on" : "off",
+    };
+  }
+
+  applyToControls(loadSettings());
+
+  themeInputs.forEach((input) => {
+    input.addEventListener("change", () => {
+      const next = currentState();
+      saveSettings(next);
+      applyToControls(next);
+    });
+  });
+  fontSelect.addEventListener("change", () => {
+    const next = currentState();
+    saveSettings(next);
+    applyToControls(next);
+  });
+  densitySelect.addEventListener("change", () => {
+    const next = currentState();
+    saveSettings(next);
+    applyToControls(next);
+  });
+  motionToggle.addEventListener("change", () => {
+    const next = currentState();
+    saveSettings(next);
+    applyToControls(next);
+  });
+  noiseToggle.addEventListener("change", () => {
+    const next = currentState();
+    saveSettings(next);
+    applyToControls(next);
+  });
+
+  btnReset.addEventListener("click", () => {
+    saveSettings({ ...defaults });
+    applyToControls({ ...defaults });
+  });
+</script>
+{% endblock %}

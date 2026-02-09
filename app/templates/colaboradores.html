@@ -1,0 +1,453 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Colaboradores de campo • Biodiversidade{% endblock %}
+
+{% block header_title %}
+Colaboradores de campo
+{% endblock %}
+
+{% block header_subtitle %}
+<p class="text-[11px] text-slate-400">
+  Cadastre e gerencie os colaboradores que utilizam o aplicativo em campo.
+</p>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <!-- Header + ações -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h1 class="text-xl md:text-2xl font-semibold">Equipe de coleta</h1>
+      <p class="text-sm text-slate-300/80">
+        Cadastre e gerencie os colaboradores que utilizam o app em campo.
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="relative">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Buscar por nome ou e-mail..."
+          class="w-56 md:w-64 px-3 py-2 rounded-xl bg-slate-950/70 border border-slate-700/80 text-xs md:text-sm
+                 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30"
+        />
+      </div>
+      <button
+        id="btnNovo"
+        class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs md:text-sm font-semibold
+               hover:bg-emerald-400 hover:shadow-neon hover:-translate-y-[1px]
+               active:translate-y-0 active:shadow-none transition-all"
+      >
+        <span>Novo colaborador</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Card / tabela -->
+  <div class="relative">
+    <div class="absolute -inset-0.5 bg-gradient-to-tr from-emerald-500/40 via-emerald-400/10 to-transparent rounded-3xl blur-xl opacity-50"></div>
+    <div class="relative rounded-3xl bg-slate-950/85 border border-slate-800/80 backdrop-blur-xl p-4 md:p-6 space-y-4">
+      <div class="flex items-center justify-between text-xs text-slate-400">
+        <span id="countInfo">Carregando colaboradores...</span>
+        <span class="hidden md:inline text-slate-500">Só usuários ADMIN podem editar estes dados.</span>
+      </div>
+
+      <div class="overflow-hidden rounded-2xl border border-slate-800/80">
+        <table class="min-w-full text-xs md:text-sm">
+          <thead class="bg-slate-900/80 border-b border-slate-800/80">
+            <tr>
+              <th class="px-3 py-2 text-left font-medium text-slate-300">Nome</th>
+              <th class="px-3 py-2 text-left font-medium text-slate-300">E-mail</th>
+              <th class="px-3 py-2 text-left font-medium text-slate-300">Telefone</th>
+              <th class="px-3 py-2 text-left font-medium text-slate-300">Status</th>
+              <th class="px-3 py-2 text-right font-medium text-slate-300">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-slate-800/80">
+            <!-- linhas renderizadas via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- Modal -->
+<div
+  id="modal"
+  class="absolute inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm"
+>
+  <div class="max-w-md w-full mx-4 rounded-3xl bg-slate-950/95 border border-slate-800/80 shadow-neon p-6 md:p-7 animate-slideIn relative">
+    <button
+      id="modalClose"
+      class="absolute top-3 right-3 text-slate-400 hover:text-slate-100 text-sm"
+    >
+      ✖
+    </button>
+
+    <h2 id="modalTitle" class="text-lg font-semibold mb-1">Novo colaborador</h2>
+    <p class="text-xs text-slate-400 mb-4">
+      Preencha os dados do colaborador que irá utilizar o aplicativo em campo.
+    </p>
+
+    <form id="modalForm" class="space-y-3">
+      <input type="hidden" id="colaboradorId" />
+
+      <div class="space-y-1">
+        <label class="text-xs text-slate-300" for="nome">Nome</label>
+        <input
+          id="nome"
+          type="text"
+          required
+          class="w-full px-3 py-2 rounded-xl bg-slate-950/70 border border-slate-700/80 text-sm
+                 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30"
+        />
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-xs text-slate-300" for="email">E-mail</label>
+        <input
+          id="email"
+          type="email"
+          required
+          class="w-full px-3 py-2 rounded-xl bg-slate-950/70 border border-slate-700/80 text-sm
+                 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30"
+        />
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-xs text-slate-300" for="telefone">Telefone</label>
+        <input
+          id="telefone"
+          type="text"
+          class="w-full px-3 py-2 rounded-xl bg-slate-950/70 border border-slate-700/80 text-sm
+                 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30"
+        />
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-xs text-slate-300" for="documento">Documento</label>
+        <input
+          id="documento"
+          type="text"
+          class="w-full px-3 py-2 rounded-xl bg-slate-950/70 border border-slate-700/80 text-sm
+                 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30"
+        />
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-xs text-slate-300" for="expiraEm">Expira em</label>
+        <input
+          id="expiraEm"
+          type="datetime-local"
+          class="w-full px-3 py-2 rounded-xl bg-slate-950/70 border border-slate-700/80 text-sm
+                 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30"
+        />
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-xs text-slate-300" for="senha">Senha (login no app)</label>
+        <input
+          id="senha"
+          type="password"
+          class="w-full px-3 py-2 rounded-xl bg-slate-950/70 border border-slate-700/80 text-sm
+                 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30"
+        />
+      </div>
+
+      <div class="flex items-center justify-between mt-2">
+        <label class="inline-flex items-center gap-2 text-xs text-slate-200">
+          <input id="ativo" type="checkbox" class="rounded border-slate-600 bg-slate-900 text-emerald-500" checked />
+          Ativo
+        </label>
+      </div>
+
+      <p id="modalError" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/40 rounded-lg px-3 py-2">
+        Ocorreu um erro ao salvar. Verifique os dados e tente novamente.
+      </p>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button
+          type="button"
+          id="btnCancelar"
+          class="px-3 py-2 text-xs rounded-xl border border-slate-700/80 text-slate-300 hover:bg-slate-900/80"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          id="btnSalvar"
+          class="px-4 py-2 text-xs rounded-xl bg-emerald-500 text-slate-950 font-semibold hover:bg-emerald-400 hover:shadow-neon transition-all"
+        >
+          Salvar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const tableBody = document.getElementById("tableBody");
+  const countInfo = document.getElementById("countInfo");
+  const searchInput = document.getElementById("searchInput");
+  const btnNovo = document.getElementById("btnNovo");
+
+  const modal = document.getElementById("modal");
+  const modalClose = document.getElementById("modalClose");
+  const btnCancelar = document.getElementById("btnCancelar");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalForm = document.getElementById("modalForm");
+  const modalError = document.getElementById("modalError");
+
+  const colaboradorIdInput = document.getElementById("colaboradorId");
+  const nomeInput = document.getElementById("nome");
+  const emailInput = document.getElementById("email");
+  const telefoneInput = document.getElementById("telefone");
+  const documentoInput = document.getElementById("documento");
+  const expiraEmInput = document.getElementById("expiraEm");
+  const senhaInput = document.getElementById("senha");
+  const ativoInput = document.getElementById("ativo");
+
+  let colaboradores = [];
+
+  function toLocalInputValue(value) {
+    if (!value) return "";
+    const dt = new Date(value);
+    if (Number.isNaN(dt.getTime())) return "";
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+  }
+
+  function abrirModal(colab = null) {
+    modalError.classList.add("hidden");
+
+    if (colab) {
+      modalTitle.textContent = "Editar colaborador";
+      colaboradorIdInput.value = colab.id;
+      nomeInput.value = colab.nome || "";
+      emailInput.value = colab.email || "";
+      telefoneInput.value = colab.telefone || "";
+      documentoInput.value = colab.documento || "";
+      expiraEmInput.value = toLocalInputValue(colab.expira_em);
+      senhaInput.value = "";
+      senhaInput.required = false;
+      senhaInput.placeholder = "Deixe em branco para manter";
+      ativoInput.checked = colab.ativo;
+    } else {
+      modalTitle.textContent = "Novo colaborador";
+      colaboradorIdInput.value = "";
+      nomeInput.value = "";
+      emailInput.value = "";
+      telefoneInput.value = "";
+      documentoInput.value = "";
+      expiraEmInput.value = "";
+      senhaInput.value = "";
+      senhaInput.required = true;
+      senhaInput.placeholder = "Defina a senha";
+      ativoInput.checked = true;
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  function fecharModal() {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+
+  function renderTabela() {
+    const termo = searchInput.value.toLowerCase();
+    const filtrados = colaboradores.filter((c) => {
+      return (
+        c.nome.toLowerCase().includes(termo) ||
+        (c.email || "").toLowerCase().includes(termo)
+      );
+    });
+
+    tableBody.innerHTML = "";
+    if (filtrados.length === 0) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="5" class="px-3 py-4 text-center text-xs text-slate-400">
+            Nenhum colaborador encontrado.
+          </td>
+        </tr>
+      `;
+    } else {
+      for (const c of filtrados) {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-900/60 transition";
+
+        tr.innerHTML = `
+          <td class="px-3 py-2 align-middle">
+            <div class="flex flex-col">
+              <span class="font-medium">${c.nome}</span>
+              ${c.documento ? `<span class="text-[11px] text-slate-400">${c.documento}</span>` : ""}
+            </div>
+          </td>
+          <td class="px-3 py-2 align-middle">${c.email || "-"}</td>
+          <td class="px-3 py-2 align-middle">${c.telefone || "-"}</td>
+          <td class="px-3 py-2 align-middle">
+            ${
+              c.ativo
+                ? `<span class="px-2 py-1 text-[11px] rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-300">Ativo</span>`
+                : `<span class="px-2 py-1 text-[11px] rounded-full bg-slate-700/40 border border-slate-600/80 text-slate-200">Inativo</span>`
+            }
+          </td>
+          <td class="px-3 py-2 align-middle text-right">
+            <button
+              class="text-xs px-2 py-1 rounded-lg bg-slate-900/80 border border-slate-700/80 text-slate-200 hover:border-emerald-400 hover:text-emerald-300 mr-2"
+              data-action="edit"
+              data-id="${c.id}"
+            >
+              Editar
+            </button>
+            <button
+              class="text-xs px-2 py-1 rounded-lg bg-rose-500/10 border border-rose-500/60 text-rose-300 hover:bg-rose-500/20"
+              data-action="delete"
+              data-id="${c.id}"
+            >
+              Remover
+            </button>
+          </td>
+        `;
+
+        tableBody.appendChild(tr);
+      }
+    }
+
+    countInfo.textContent = `${filtrados.length} colaborador(es) listado(s)`;
+  }
+
+  async function carregarColaboradores() {
+    countInfo.textContent = "Carregando colaboradores...";
+    try {
+      const res = await fetch("/api/colaboradores/");
+      if (!res.ok) throw new Error("Erro ao carregar");
+      colaboradores = await res.json();
+      renderTabela();
+    } catch (err) {
+      console.error(err);
+      countInfo.textContent = "Erro ao carregar colaboradores.";
+    }
+  }
+
+  tableBody.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    const id = btn.getAttribute("data-id");
+    const action = btn.getAttribute("data-action");
+    const colab = colaboradores.find((c) => c.id == id);
+    if (!colab) return;
+
+    if (action === "edit") {
+      abrirModal(colab);
+    } else if (action === "delete") {
+      if (!confirm(`Remover o colaborador "${colab.nome}"?`)) return;
+      try {
+        const res = await fetch(`/api/colaboradores/${id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Erro ao remover");
+        colaboradores = colaboradores.filter((c) => c.id != id);
+        renderTabela();
+      } catch (err) {
+        console.error(err);
+        alert("Erro ao remover colaborador.");
+      }
+    }
+  });
+
+  btnNovo.addEventListener("click", () => abrirModal());
+  modalClose.addEventListener("click", fecharModal);
+  btnCancelar.addEventListener("click", fecharModal);
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) fecharModal();
+  });
+
+  modalForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    modalError.classList.add("hidden");
+
+    if (!modalForm.reportValidity()) {
+      return;
+    }
+
+    const id = colaboradorIdInput.value;
+    const senha = senhaInput.value.trim();
+
+    if (!id && !senha) {
+      modalError.textContent = "Informe uma senha para o colaborador.";
+      modalError.classList.remove("hidden");
+      return;
+    }
+
+    const payload = {
+      nome: nomeInput.value.trim(),
+      email: emailInput.value.trim() || null,
+      telefone: telefoneInput.value.trim() || null,
+      documento: documentoInput.value.trim() || null,
+      expira_em: expiraEmInput.value ? new Date(expiraEmInput.value).toISOString() : null,
+      ativo: ativoInput.checked,
+    };
+
+    if (senha) {
+      payload.senha = senha;
+    }
+
+    const url = id ? `/api/colaboradores/${id}` : "/api/colaboradores/";
+    const method = id ? "PUT" : "POST";
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        let errorText = "Ocorreu um erro ao salvar. Verifique os dados e tente novamente.";
+        try {
+          const err = await res.json();
+          if (typeof err.detail === "string") {
+            errorText = err.detail;
+          } else if (Array.isArray(err.detail) && err.detail.length) {
+            errorText = err.detail.map((item) => item.msg || "Dados inválidos.").join(", ");
+          }
+        } catch (_) {
+          // Mantém mensagem padrão.
+        }
+        modalError.textContent = errorText;
+        modalError.classList.remove("hidden");
+        return;
+      }
+
+      const colab = await res.json();
+
+      if (id) {
+        const idx = colaboradores.findIndex((c) => c.id == id);
+        if (idx >= 0) colaboradores[idx] = colab;
+      } else {
+        colaboradores.push(colab);
+      }
+
+      renderTabela();
+      fecharModal();
+    } catch (err) {
+      console.error(err);
+      modalError.textContent = "Ocorreu um erro ao salvar. Verifique os dados e tente novamente.";
+      modalError.classList.remove("hidden");
+    }
+  });
+
+  searchInput.addEventListener("input", () => {
+    renderTabela();
+  });
+
+  // Carregar ao iniciar
+  carregarColaboradores();
+</script>
+{% endblock %}
