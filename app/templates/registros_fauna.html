@@ -12,6 +12,7 @@
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.tailwindcss.css" />
 <style>
   #mapa-fauna { height: 420px; width: 100%; }
   .foto-ratio { aspect-ratio: 4 / 3; }
@@ -39,6 +40,38 @@
     background:
       linear-gradient(180deg, rgba(15, 23, 42, 0.85), rgba(2, 6, 23, 0.9)),
       rgba(2, 6, 23, 0.9);
+  }
+  .dt-container {
+    color: #cbd5e1;
+  }
+  .dt-container .dt-length label,
+  .dt-container .dt-search label {
+    color: #94a3b8;
+    font-size: 11px;
+  }
+  .dt-container .dt-input,
+  .dt-container select.dt-input {
+    background: rgba(15, 23, 42, 0.88) !important;
+    border: 1px solid rgba(51, 65, 85, 0.9) !important;
+    color: #e2e8f0 !important;
+    border-radius: 0.55rem;
+  }
+  .dt-container .dt-paging .dt-paging-button {
+    border: 1px solid rgba(51, 65, 85, 0.9) !important;
+    background: rgba(15, 23, 42, 0.82) !important;
+    color: #cbd5e1 !important;
+    border-radius: 0.5rem;
+    margin: 0 2px;
+  }
+  .dt-container .dt-paging .dt-paging-button.current,
+  .dt-container .dt-paging .dt-paging-button.current:hover {
+    border-color: rgba(16, 185, 129, 0.55) !important;
+    background: rgba(16, 185, 129, 0.14) !important;
+    color: #86efac !important;
+  }
+  .dt-container .dt-info {
+    color: #94a3b8;
+    font-size: 11px;
   }
 </style>
 {% endblock %}
@@ -199,7 +232,7 @@
       </div>
 
       <div class="table-shell max-h-[560px] overflow-auto">
-        <table class="min-w-full text-xs">
+        <table id="table-registros" class="min-w-full text-xs">
           <thead class="bg-slate-900/92 border-b border-slate-800 text-[11px] uppercase tracking-wide text-slate-400">
             <tr>
               <th class="px-3 py-2 text-center w-10">
@@ -562,8 +595,11 @@
 
 {% block extra_scripts %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.tailwindcss.js"></script>
 <script>
   const tbody = document.getElementById("tbody-registros");
+  const tableRegistros = document.getElementById("table-registros");
   const infoTotal = document.getElementById("info-total");
   const buscaTexto = document.getElementById("busca-texto");
   const filtroDataInicio = document.getElementById("filtro-data-inicio");
@@ -627,6 +663,7 @@
 
   let mapa = null;
   let mapaMarker = null;
+  let tabelaRegistros = null;
 
   let registros = [];
   let registrosFiltrados = [];
@@ -740,6 +777,41 @@
     statFotos.textContent = String(totalComFoto);
     statGps.textContent = String(totalComGps);
     statValidado.textContent = String(totalValidados);
+  }
+
+  function destruirTabelaPaginada() {
+    if (!tabelaRegistros) return;
+    tabelaRegistros.destroy();
+    tabelaRegistros = null;
+  }
+
+  function inicializarTabelaPaginada() {
+    if (!tableRegistros || typeof DataTable !== "function") return;
+    destruirTabelaPaginada();
+
+    tabelaRegistros = new DataTable(tableRegistros, {
+      paging: true,
+      pageLength: 10,
+      lengthMenu: [10, 25, 50, 100],
+      searching: false,
+      ordering: true,
+      info: false,
+      order: [[1, "desc"]],
+      autoWidth: false,
+      columnDefs: [
+        { targets: [0, 7], orderable: false },
+      ],
+      language: {
+        emptyTable: "Nenhum registro encontrado.",
+        lengthMenu: "_MENU_ por pagina",
+        paginate: {
+          first: "Primeira",
+          previous: "Anterior",
+          next: "Proxima",
+          last: "Ultima",
+        },
+      },
+    });
   }
 
   [
@@ -885,6 +957,7 @@
   }
 
   function renderTabela(lista) {
+    destruirTabelaPaginada();
     tbody.innerHTML = "";
 
     if (!lista.length) {
@@ -918,7 +991,7 @@
               ${marcado ? "checked" : ""}
             />
           </td>
-          <td class="px-3 py-2 align-middle text-[11px] text-slate-300">
+          <td class="px-3 py-2 align-middle text-[11px] text-slate-300" data-order="${r.data_captura || ""}">
             ${formatarData(r.data_captura)}
           </td>
           <td class="px-3 py-2 align-middle text-[11px] text-slate-200">
@@ -972,6 +1045,8 @@
 
         tbody.appendChild(tr);
       }
+
+      inicializarTabelaPaginada();
     }
 
     infoTotal.textContent = `${lista.length} registro(s) visivel(is) de ${registros.length}`;
@@ -1221,6 +1296,7 @@
       console.error(err);
       infoTotal.textContent = "Erro ao carregar registros.";
       registrosFiltrados = [];
+      destruirTabelaPaginada();
       tbody.innerHTML = `
         <tr>
           <td colspan="8" class="px-3 py-4 text-center text-[11px] text-rose-400">
