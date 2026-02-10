@@ -1,9 +1,12 @@
+import base64
 import json
+import re
 import shutil
 import uuid
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
+from urllib.parse import urlparse
 from xml.sax.saxutils import escape
 
 from fastapi import APIRouter, Depends, UploadFile, File, Form, Request, HTTPException, Query, status
@@ -13,7 +16,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import mm
-from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.platypus import Image as RLImage, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from sqlalchemy.orm import Session, joinedload
 
 from app.db.session import get_db
@@ -122,6 +125,113 @@ def _registro_to_export_dict(registro: RegistroFauna) -> dict[str, str]:
     }
 
 
+def _normalizar_foto_path(valor: str | None) -> str | None:
+    if valor is None:
+        return None
+
+    v = str(valor).strip()
+    if not v or v == "-" or v.lower() == "null":
+        return None
+
+    if v.lower().startswith("data:image/"):
+        return v
+    if v.lower().startswith("http://") or v.lower().startswith("https://"):
+        return v
+
+    if re.fullmatch(r"[A-Za-z0-9+/=]+", v) and len(v) > 200:
+        return f"data:image/png;base64,{v}"
+
+    v = v.replace("\\", "/")
+    lower = v.lower()
+    media_index = lower.rfind("/media/")
+    if media_index >= 0:
+        return v[media_index:]
+
+    if v.startswith("/"):
+        return v
+    if lower.startswith("media/"):
+        return f"/{v}"
+    if lower.startswith("fauna/"):
+        return f"/media/{v}"
+    return f"/media/{v}"
+
+
+def _resolver_arquivo_midia(path_valor: str) -> Path | None:
+    caminho = path_valor
+    if caminho.lower().startswith("http://") or caminho.lower().startswith("https://"):
+        caminho = urlparse(caminho).path or ""
+
+    caminho = caminho.split("?", 1)[0].replace("\\", "/")
+    lower = caminho.lower()
+
+    relativo = ""
+    media_index = lower.find("/media/")
+    if media_index >= 0:
+        relativo = caminho[media_index + len("/media/") :]
+    else:
+        candidato = caminho.lstrip("/")
+        if candidato.lower().startswith("media/"):
+            relativo = candidato[len("media/") :]
+        else:
+            relativo = candidato
+
+    relativo = relativo.strip().lstrip("/")
+    if not relativo:
+        return None
+
+    base_resolvida = MEDIA_ROOT.resolve()
+    arquivo = (MEDIA_ROOT / relativo).resolve()
+    try:
+        arquivo.relative_to(base_resolvida)
+    except ValueError:
+        return None
+
+    if not arquivo.exists() or not arquivo.is_file():
+        return None
+
+    return arquivo
+
+
+def _criar_imagem_pdf(valor_foto: str | None, largura_max_mm: float = 82.0, altura_max_mm: float = 60.0):
+    normalizado = _normalizar_foto_path(valor_foto)
+    if not normalizado:
+        return None
+
+    source = None
+
+    if normalizado.lower().startswith("data:image/"):
+        partes = normalizado.split(",", 1)
+        if len(partes) != 2:
+            return None
+        try:
+            source = BytesIO(base64.b64decode(partes[1], validate=False))
+        except (ValueError, TypeError):
+            return None
+    else:
+        arquivo = _resolver_arquivo_midia(normalizado)
+        if arquivo is None:
+            return None
+        source = str(arquivo)
+
+    try:
+        image = RLImage(source)
+    except Exception:
+        return None
+
+    largura_max = largura_max_mm * mm
+    altura_max = altura_max_mm * mm
+    largura_base = float(image.imageWidth or 0)
+    altura_base = float(image.imageHeight or 0)
+    if largura_base <= 0 or altura_base <= 0:
+        return None
+
+    escala = min(largura_max / largura_base, altura_max / altura_base, 1.0)
+    image.drawWidth = largura_base * escala
+    image.drawHeight = altura_base * escala
+    image.hAlign = "CENTER"
+    return image
+
+
 def _buscar_registros_para_exportacao(db: Session, ids: list[int] | None) -> list[RegistroFauna]:
     query = db.query(RegistroFauna).options(joinedload(RegistroFauna.colaborador))
     if ids:
@@ -183,13 +293,14 @@ def _gerar_pdf_registros(registros: list[RegistroFauna]) -> BytesIO:
     styles = getSampleStyleSheet()
     body_style = styles["BodyText"]
     story = []
+    data_geracao = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
     for idx, r in enumerate(registros):
         export_data = _registro_to_export_dict(r)
         story.append(Paragraph(f"<b>Registro de Fauna #{escape(export_data['id'])}</b>", styles["Heading3"]))
         story.append(
             Paragraph(
-                f"Gerado em {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}",
+                f"Gerado em {data_geracao}",
                 body_style,
             )
         )
@@ -217,6 +328,36 @@ def _gerar_pdf_registros(registros: list[RegistroFauna]) -> BytesIO:
             )
         )
         story.append(table)
+        story.append(Spacer(1, 8))
+
+        foto_animal = _criar_imagem_pdf(r.foto_animal_path)
+        foto_local = _criar_imagem_pdf(r.foto_local_path)
+
+        def _celula_foto(titulo: str, imagem):
+            conteudo = [Paragraph(f"<b>{escape(titulo)}</b>", body_style), Spacer(1, 3)]
+            if imagem is not None:
+                conteudo.append(imagem)
+            else:
+                conteudo.append(Paragraph("Sem foto disponivel.", body_style))
+            return conteudo
+
+        fotos_table = Table(
+            [[_celula_foto("Foto do animal", foto_animal), _celula_foto("Foto do local", foto_local)]],
+            colWidths=[88 * mm, 88 * mm],
+        )
+        fotos_table.setStyle(
+            TableStyle(
+                [
+                    ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#CBD5E1")),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                    ("TOPPADDING", (0, 0), (-1, -1), 5),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                ]
+            )
+        )
+        story.append(fotos_table)
 
         if idx < len(registros) - 1:
             story.append(PageBreak())

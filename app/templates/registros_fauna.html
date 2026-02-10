@@ -15,46 +15,109 @@
 <style>
   #mapa-fauna { height: 420px; width: 100%; }
   .foto-ratio { aspect-ratio: 4 / 3; }
+  .hero-card {
+    background:
+      radial-gradient(1200px 300px at 5% 0%, rgba(16, 185, 129, 0.14), transparent 58%),
+      radial-gradient(900px 280px at 95% 10%, rgba(14, 116, 144, 0.16), transparent 58%),
+      rgba(2, 6, 23, 0.84);
+  }
+  .stat-card {
+    border: 1px solid rgba(51, 65, 85, 0.85);
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.88));
+    box-shadow: inset 0 0 0 1px rgba(30, 41, 59, 0.35);
+  }
+  .table-shell thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    backdrop-filter: blur(8px);
+  }
+  .table-shell tbody tr {
+    border-left: 2px solid transparent;
+  }
+  .detalhe-card {
+    background:
+      linear-gradient(180deg, rgba(15, 23, 42, 0.85), rgba(2, 6, 23, 0.9)),
+      rgba(2, 6, 23, 0.9);
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="space-y-5 pb-10 animate-fadeUp">
-  <!-- Filtros superiores -->
-  <div class="relative bg-slate-950/80 border border-slate-800/80 rounded-2xl px-4 py-3 flex flex-wrap gap-3 items-center justify-between">
-    <div class="flex items-center gap-2">
+  <section class="hero-card relative overflow-hidden rounded-3xl border border-slate-800/80 p-4 md:p-6">
+    <div class="relative grid gap-4 lg:grid-cols-[1.3fr_1fr] lg:items-end">
+      <div class="space-y-3">
+        <span class="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
+          Painel de monitoramento
+        </span>
+        <div>
+          <h2 class="text-lg md:text-2xl font-semibold text-slate-100">Central de registros de fauna</h2>
+          <p class="mt-1 text-[12px] md:text-[13px] text-slate-300/90 max-w-2xl">
+            Filtre rapidamente, selecione em lote, exporte com um clique e acompanhe os registros com fotos e coordenadas.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-2">
+        <div class="stat-card rounded-xl p-3">
+          <p class="text-[10px] uppercase tracking-wider text-slate-400">Total</p>
+          <p id="stat-total" class="mt-1 text-lg font-semibold text-slate-100">-</p>
+        </div>
+        <div class="stat-card rounded-xl p-3">
+          <p class="text-[10px] uppercase tracking-wider text-slate-400">Filtrados</p>
+          <p id="stat-filtrados" class="mt-1 text-lg font-semibold text-slate-100">-</p>
+        </div>
+        <div class="stat-card rounded-xl p-3">
+          <p class="text-[10px] uppercase tracking-wider text-slate-400">Com foto</p>
+          <p id="stat-fotos" class="mt-1 text-lg font-semibold text-slate-100">-</p>
+        </div>
+        <div class="stat-card rounded-xl p-3">
+          <p class="text-[10px] uppercase tracking-wider text-slate-400">Com GPS</p>
+          <p id="stat-gps" class="mt-1 text-lg font-semibold text-slate-100">-</p>
+        </div>
+        <div class="stat-card rounded-xl p-3">
+          <p class="text-[10px] uppercase tracking-wider text-slate-400">Validados</p>
+          <p id="stat-validado" class="mt-1 text-lg font-semibold text-slate-100">-</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="rounded-2xl border border-slate-800/80 bg-slate-950/80 p-4 md:p-5 backdrop-blur-xl">
+    <div class="flex items-center gap-2 mb-3">
       <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
       <span class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-        Filtros de registros
+        Filtros e exportacoes
       </span>
     </div>
 
-    <div class="flex flex-wrap gap-2 items-center flex-1 justify-end">
-      <div class="flex items-center gap-2">
-        <label for="filtro-data-inicio" class="text-[11px] text-slate-400">De:</label>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
+      <label class="space-y-1">
+        <span class="text-[11px] text-slate-400">Data inicio</span>
         <input
           type="date"
           id="filtro-data-inicio"
-          class="w-32 bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+          class="w-full bg-slate-900/80 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2
                  outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
         />
-      </div>
+      </label>
 
-      <div class="flex items-center gap-2">
-        <label for="filtro-data-fim" class="text-[11px] text-slate-400">Ate:</label>
+      <label class="space-y-1">
+        <span class="text-[11px] text-slate-400">Data fim</span>
         <input
           type="date"
           id="filtro-data-fim"
-          class="w-32 bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+          class="w-full bg-slate-900/80 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2
                  outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
         />
-      </div>
+      </label>
 
-      <div class="flex items-center gap-2 min-w-[200px]">
-        <label for="filtro-municipio" class="text-[11px] text-slate-400">Municipio:</label>
+      <label class="space-y-1 xl:col-span-2">
+        <span class="text-[11px] text-slate-400">Municipio</span>
         <select
           id="filtro-municipio"
-          class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+          class="w-full bg-slate-900/80 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2
                  outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
         >
           <option value="">Todos</option>
@@ -62,210 +125,224 @@
             <option value="{{ muni }}">{{ muni }}</option>
           {% endfor %}
         </select>
+      </label>
+
+      <div class="grid grid-cols-2 gap-2 items-end">
+        <button
+          id="btn-aplicar-filtros"
+          type="button"
+          class="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-emerald-500 text-slate-950 text-xs font-semibold
+                 hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.55)] transition-all"
+        >
+          Aplicar
+        </button>
+        <button
+          id="btn-limpar-filtros"
+          type="button"
+          class="px-3 py-2 rounded-lg border border-slate-700 text-[11px] text-slate-300 hover:bg-slate-900/80 transition"
+        >
+          Limpar
+        </button>
       </div>
-
-      <button
-        id="btn-aplicar-filtros"
-        type="button"
-        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 text-xs font-semibold
-               hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)] transition-all"
-      >
-        <span>Aplicar</span>
-      </button>
-
-      <button
-        id="btn-limpar-filtros"
-        type="button"
-        class="text-[11px] text-slate-400 hover:text-slate-100 transition"
-      >
-        Limpar
-      </button>
     </div>
-  </div>
 
-  <!-- GRID PRINCIPAL: tabela + painel lateral -->
+    <div class="mt-3 pt-3 border-t border-slate-800/80 flex flex-col lg:flex-row lg:items-center gap-3 justify-between">
+      <input
+        id="busca-texto"
+        type="text"
+        placeholder="Buscar por especie, municipio, biologo, colaborador ou dispositivo..."
+        class="w-full lg:max-w-xl bg-slate-900/80 border border-slate-700 text-[12px] text-slate-100 rounded-lg px-3 py-2
+               outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/30"
+      />
+
+      <div class="flex flex-wrap items-center gap-2">
+        <span id="info-selecao" class="text-[11px] text-slate-400 px-2 py-1 rounded-md bg-slate-900/80 border border-slate-800">
+          0 selecionado(s)
+        </span>
+        <button
+          id="btn-exportar-pdf"
+          type="button"
+          class="px-3 py-2 rounded-lg border border-emerald-500/60 text-[11px] text-emerald-300 hover:bg-emerald-500/10 transition disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          PDF selecionados
+        </button>
+        <button
+          id="btn-exportar-excel-selecionados"
+          type="button"
+          class="px-3 py-2 rounded-lg border border-amber-500/60 text-[11px] text-amber-300 hover:bg-amber-500/10 transition disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Excel selecionados
+        </button>
+        <button
+          id="btn-exportar-excel-todos"
+          type="button"
+          class="px-3 py-2 rounded-lg border border-sky-500/60 text-[11px] text-sky-300 hover:bg-sky-500/10 transition"
+        >
+          Excel todos
+        </button>
+      </div>
+    </div>
+  </section>
+
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-    <!-- Tabela -->
-    <div class="lg:col-span-8">
-      <div class="relative rounded-2xl bg-slate-950/85 border border-slate-800/80 backdrop-blur-xl">
-        <div class="px-4 py-3 flex items-center justify-between border-b border-slate-800/80 text-xs">
-          <div class="flex flex-col">
-            <span class="font-semibold text-slate-100">Registros de fauna</span>
-            <span id="info-total" class="text-[11px] text-slate-500">Carregando registros...</span>
+    <section class="lg:col-span-8 rounded-2xl bg-slate-950/85 border border-slate-800/80 backdrop-blur-xl overflow-hidden">
+      <div class="px-4 py-3 border-b border-slate-800/80">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="text-sm font-semibold text-slate-100">Registros de fauna</p>
+            <p id="info-total" class="text-[11px] text-slate-500">Carregando registros...</p>
           </div>
-          <div class="flex flex-wrap items-center justify-end gap-2">
-            <input
-              id="busca-texto"
-              type="text"
-              placeholder="Buscar por especie, municipio, biologo..."
-              class="w-52 md:w-64 bg-slate-950 border border-slate-700 text-[11px] text-slate-200 rounded-lg px-2 py-1.5
-                     outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/30"
-            />
-            <span id="info-selecao" class="text-[11px] text-slate-400">0 selecionado(s)</span>
-            <button
-              id="btn-exportar-pdf"
-              type="button"
-              class="px-2.5 py-1.5 rounded-lg border border-emerald-500/60 text-[11px] text-emerald-300 hover:bg-emerald-500/10 transition disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              PDF selecionados
-            </button>
-            <button
-              id="btn-exportar-excel-selecionados"
-              type="button"
-              class="px-2.5 py-1.5 rounded-lg border border-amber-500/60 text-[11px] text-amber-300 hover:bg-amber-500/10 transition disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Excel selecionados
-            </button>
-            <button
-              id="btn-exportar-excel-todos"
-              type="button"
-              class="px-2.5 py-1.5 rounded-lg border border-sky-500/60 text-[11px] text-sky-300 hover:bg-sky-500/10 transition"
-            >
-              Excel todos
-            </button>
+          <div class="text-[10px] text-slate-500 uppercase tracking-wider">
+            Clique em um registro para abrir detalhes
           </div>
-        </div>
-
-        <div class="max-h-[480px] overflow-auto">
-          <table class="min-w-full text-xs">
-            <thead class="bg-slate-900/90 border-b border-slate-800 text-[11px] uppercase tracking-wide text-slate-400">
-              <tr>
-                <th class="px-3 py-2 text-center w-10">
-                  <input
-                    id="check-all-registros"
-                    type="checkbox"
-                    class="h-3.5 w-3.5 rounded border-slate-600 bg-slate-950 text-emerald-500 focus:ring-emerald-500/60"
-                    title="Selecionar todos visiveis"
-                  />
-                </th>
-                <th class="px-3 py-2 text-left">Data</th>
-                <th class="px-3 py-2 text-left">Animal</th>
-                <th class="px-3 py-2 text-left">Nome cientifico</th>
-                <th class="px-3 py-2 text-left">Biologo</th>
-                <th class="px-3 py-2 text-left">Municipio</th>
-                <th class="px-3 py-2 text-left">Colaborador</th>
-                <th class="px-3 py-2 text-right">Acoes</th>
-              </tr>
-            </thead>
-            <tbody id="tbody-registros" class="divide-y divide-slate-800">
-              <!-- linhas via JS -->
-            </tbody>
-          </table>
         </div>
       </div>
-    </div>
 
-    <!-- Painel lateral: detalhes do registro selecionado -->
-    <div class="lg:col-span-4">
-      <div class="rounded-2xl bg-slate-950/85 border border-slate-800/80 backdrop-blur-xl p-4 h-full flex flex-col">
-        <div class="flex items-center justify-between mb-3">
-          <div>
-            <p class="text-xs font-semibold text-slate-100">Detalhes do registro</p>
-            <p id="det-id" class="text-[11px] text-slate-500">Selecione um registro na tabela</p>
-          </div>
-          <button
-            id="btn-ver-mapa"
-            type="button"
-            class="text-[11px] px-2 py-1 rounded-lg border border-slate-700 text-slate-300 hover:border-emerald-400 hover:text-emerald-300 transition"
-            disabled
-          >
-            Ver no mapa
-          </button>
+      <div class="table-shell max-h-[560px] overflow-auto">
+        <table class="min-w-full text-xs">
+          <thead class="bg-slate-900/92 border-b border-slate-800 text-[11px] uppercase tracking-wide text-slate-400">
+            <tr>
+              <th class="px-3 py-2 text-center w-10">
+                <input
+                  id="check-all-registros"
+                  type="checkbox"
+                  class="h-3.5 w-3.5 rounded border-slate-600 bg-slate-950 text-emerald-500 focus:ring-emerald-500/60"
+                  title="Selecionar todos visiveis"
+                />
+              </th>
+              <th class="px-3 py-2 text-left">Data</th>
+              <th class="px-3 py-2 text-left">Animal</th>
+              <th class="px-3 py-2 text-left">Nome cientifico</th>
+              <th class="px-3 py-2 text-left">Biologo</th>
+              <th class="px-3 py-2 text-left">Municipio</th>
+              <th class="px-3 py-2 text-left">Colaborador</th>
+              <th class="px-3 py-2 text-right">Acoes</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-registros" class="divide-y divide-slate-800">
+            <!-- linhas via JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="lg:col-span-4 detalhe-card rounded-2xl border border-slate-800/80 p-4 md:p-5 h-full flex flex-col">
+      <div class="flex items-start justify-between gap-3 mb-4">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-300">Detalhes do registro</p>
+          <p id="det-id" class="text-[11px] text-slate-500 mt-1">Selecione um registro na tabela</p>
         </div>
+        <button
+          id="btn-ver-mapa"
+          type="button"
+          class="text-[11px] px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 hover:border-emerald-400 hover:text-emerald-300 transition"
+          disabled
+        >
+          Ver no mapa
+        </button>
+      </div>
 
-        <div class="flex-1 space-y-3 text-[11px] text-slate-300">
-          <div>
+      <div class="flex-1 space-y-3 text-[11px] text-slate-300">
+        <div class="grid grid-cols-1 gap-3">
+          <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
             <p class="text-slate-500">Animal</p>
-            <p id="det-animal" class="font-medium text-slate-100">-</p>
+            <p id="det-animal" class="mt-0.5 font-semibold text-slate-100">-</p>
           </div>
-          <div>
+          <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
             <p class="text-slate-500">Nome cientifico</p>
-            <p id="det-especie" class="font-medium text-slate-100 break-words">-</p>
+            <p id="det-especie" class="mt-0.5 font-medium text-slate-100 break-words">-</p>
           </div>
-          <div>
+          <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
             <p class="text-slate-500">Biologo responsavel</p>
-            <p id="det-biologo" class="font-medium text-slate-100">-</p>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <p class="text-slate-500">Municipio</p>
-              <p id="det-municipio" class="font-medium text-slate-100">-</p>
-            </div>
-            <div>
-              <p class="text-slate-500">Data</p>
-              <p id="det-data" class="font-medium text-slate-100">-</p>
-            </div>
-          </div>
-          <div>
-            <p class="text-slate-500">Local de captura</p>
-            <p id="det-local" class="font-medium text-slate-100 break-words">-</p>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <p class="text-slate-500">Periodo</p>
-              <p id="det-periodo" class="font-medium text-slate-100">-</p>
-            </div>
-            <div>
-              <p class="text-slate-500">Estado de saude</p>
-              <p id="det-saude" class="font-medium text-slate-100">-</p>
-            </div>
-          </div>
-          <div>
-            <p class="text-slate-500">Destino</p>
-            <p id="det-destino" class="font-medium text-slate-100">-</p>
-          </div>
-          <div>
-            <p class="text-slate-500">Observacoes</p>
-            <p id="det-observacoes" class="font-medium text-slate-100 break-words">-</p>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <p class="text-slate-500">Latitude</p>
-              <p id="det-lat" class="font-mono text-xs text-emerald-300">-</p>
-            </div>
-            <div>
-              <p class="text-slate-500">Longitude</p>
-              <p id="det-lon" class="font-mono text-xs text-emerald-300">-</p>
-            </div>
-          </div>
-          <div>
-            <p class="text-slate-500">Status</p>
-            <span id="det-status" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-200">
-              -
-            </span>
+            <p id="det-biologo" class="mt-0.5 font-medium text-slate-100">-</p>
           </div>
         </div>
 
-        <div class="pt-4 border-t border-slate-800 mt-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <p class="text-[11px] uppercase tracking-wider text-slate-500">Fotos do registro</p>
-            <span id="det-fotos-count" class="text-[10px] text-slate-600">0 foto(s)</span>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+            <p class="text-slate-500">Municipio</p>
+            <p id="det-municipio" class="mt-0.5 font-medium text-slate-100">-</p>
           </div>
+          <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+            <p class="text-slate-500">Data</p>
+            <p id="det-data" class="mt-0.5 font-medium text-slate-100">-</p>
+          </div>
+        </div>
 
-          <div class="grid grid-cols-2 gap-3">
-            <div class="space-y-1">
-              <p class="text-[11px] text-slate-500">Animal</p>
-              <div class="foto-ratio relative w-full rounded-lg border border-slate-800 bg-slate-900/60 overflow-hidden">
-                <img id="foto-animal" alt="Foto do animal" class="h-full w-full object-cover hidden" loading="lazy" />
-                <div id="foto-animal-placeholder" class="absolute inset-0 flex items-center justify-center text-[10px] text-slate-500">
-                  Sem foto
-                </div>
+        <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+          <p class="text-slate-500">Local de captura</p>
+          <p id="det-local" class="mt-0.5 font-medium text-slate-100 break-words">-</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+            <p class="text-slate-500">Periodo</p>
+            <p id="det-periodo" class="mt-0.5 font-medium text-slate-100">-</p>
+          </div>
+          <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+            <p class="text-slate-500">Estado de saude</p>
+            <p id="det-saude" class="mt-0.5 font-medium text-slate-100">-</p>
+          </div>
+        </div>
+
+        <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+          <p class="text-slate-500">Destino</p>
+          <p id="det-destino" class="mt-0.5 font-medium text-slate-100">-</p>
+        </div>
+
+        <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+          <p class="text-slate-500">Observacoes</p>
+          <p id="det-observacoes" class="mt-0.5 font-medium text-slate-100 break-words">-</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+            <p class="text-slate-500">Latitude</p>
+            <p id="det-lat" class="mt-0.5 font-mono text-xs text-emerald-300">-</p>
+          </div>
+          <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+            <p class="text-slate-500">Longitude</p>
+            <p id="det-lon" class="mt-0.5 font-mono text-xs text-emerald-300">-</p>
+          </div>
+        </div>
+
+        <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+          <p class="text-slate-500">Status</p>
+          <span id="det-status" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-200 mt-1">
+            -
+          </span>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 mt-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <p class="text-[11px] uppercase tracking-wider text-slate-500">Fotos do registro</p>
+          <span id="det-fotos-count" class="text-[10px] text-slate-500">0 foto(s)</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <p class="text-[11px] text-slate-500">Animal</p>
+            <div class="foto-ratio relative w-full rounded-lg border border-slate-800 bg-slate-900/60 overflow-hidden">
+              <img id="foto-animal" alt="Foto do animal" class="h-full w-full object-cover hidden" loading="lazy" />
+              <div id="foto-animal-placeholder" class="absolute inset-0 flex items-center justify-center text-[10px] text-slate-500">
+                Sem foto
               </div>
             </div>
+          </div>
 
-            <div class="space-y-1">
-              <p class="text-[11px] text-slate-500">Local</p>
-              <div class="foto-ratio relative w-full rounded-lg border border-slate-800 bg-slate-900/60 overflow-hidden">
-                <img id="foto-local" alt="Foto do local" class="h-full w-full object-cover hidden" loading="lazy" />
-                <div id="foto-local-placeholder" class="absolute inset-0 flex items-center justify-center text-[10px] text-slate-500">
-                  Sem foto
-                </div>
+          <div class="space-y-1">
+            <p class="text-[11px] text-slate-500">Local</p>
+            <div class="foto-ratio relative w-full rounded-lg border border-slate-800 bg-slate-900/60 overflow-hidden">
+              <img id="foto-local" alt="Foto do local" class="h-full w-full object-cover hidden" loading="lazy" />
+              <div id="foto-local-placeholder" class="absolute inset-0 flex items-center justify-center text-[10px] text-slate-500">
+                Sem foto
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 </div>
 
@@ -499,6 +576,11 @@
   const btnExportarPdf = document.getElementById("btn-exportar-pdf");
   const btnExportarExcelSelecionados = document.getElementById("btn-exportar-excel-selecionados");
   const btnExportarExcelTodos = document.getElementById("btn-exportar-excel-todos");
+  const statTotal = document.getElementById("stat-total");
+  const statFiltrados = document.getElementById("stat-filtrados");
+  const statFotos = document.getElementById("stat-fotos");
+  const statGps = document.getElementById("stat-gps");
+  const statValidado = document.getElementById("stat-validado");
 
   const detId = document.getElementById("det-id");
   const detAnimal = document.getElementById("det-animal");
@@ -632,6 +714,32 @@
 
     const total = [animalUrl, localUrl].filter(Boolean).length;
     detFotosCount.textContent = `${total} foto(s)`;
+  }
+
+  function possuiCoordenadas(r) {
+    return (
+      r &&
+      r.latitude != null &&
+      r.longitude != null &&
+      !Number.isNaN(Number(r.latitude)) &&
+      !Number.isNaN(Number(r.longitude))
+    );
+  }
+
+  function atualizarIndicadores(lista) {
+    const totalGeral = registros.length;
+    const totalFiltrados = lista.length;
+    const totalComFoto = lista.filter(
+      (r) => normalizarFotoPath(r.foto_animal_path) || normalizarFotoPath(r.foto_local_path)
+    ).length;
+    const totalComGps = lista.filter((r) => possuiCoordenadas(r)).length;
+    const totalValidados = lista.filter((r) => String(r.status || "").toUpperCase() === "VALIDADO").length;
+
+    statTotal.textContent = String(totalGeral);
+    statFiltrados.textContent = String(totalFiltrados);
+    statFotos.textContent = String(totalComFoto);
+    statGps.textContent = String(totalComGps);
+    statValidado.textContent = String(totalValidados);
   }
 
   [
@@ -791,8 +899,14 @@
       for (const r of lista) {
         const idNormalizado = normalizarId(r.id);
         const marcado = idNormalizado && registrosSelecionados.has(idNormalizado);
+        const selecionado = registroSelecionado && normalizarId(registroSelecionado.id) === idNormalizado;
         const tr = document.createElement("tr");
-        tr.className = "hover:bg-slate-900/70 transition cursor-pointer";
+        tr.className = [
+          "transition cursor-pointer border-l-2",
+          selecionado
+            ? "bg-emerald-500/10 border-emerald-500/40"
+            : "border-transparent hover:bg-slate-900/70",
+        ].join(" ");
         tr.dataset.id = r.id ?? "";
 
         tr.innerHTML = `
@@ -860,8 +974,19 @@
       }
     }
 
-    infoTotal.textContent = `${lista.length} registro(s) listado(s)`;
+    infoTotal.textContent = `${lista.length} registro(s) visivel(is) de ${registros.length}`;
+    atualizarIndicadores(lista);
     atualizarEstadoSelecao();
+  }
+
+  function atualizarDestaqueLinhaSelecionada() {
+    const idSelecionado = normalizarId(registroSelecionado?.id);
+    for (const row of tbody.querySelectorAll("tr[data-id]")) {
+      const ativo = idSelecionado && normalizarId(row.dataset.id) === idSelecionado;
+      row.classList.toggle("bg-emerald-500/10", Boolean(ativo));
+      row.classList.toggle("border-emerald-500/40", Boolean(ativo));
+      row.classList.toggle("border-transparent", !ativo);
+    }
   }
 
   function selecionarRegistro(r) {
@@ -885,6 +1010,7 @@
       btnVerMapa.disabled = true;
       btnVerMapa.title = "Sem coordenadas para este registro";
       atualizarFotos(null);
+      atualizarDestaqueLinhaSelecionada();
       atualizarEstadoSelecao();
       return;
     }
@@ -902,11 +1028,7 @@
     detLat.textContent = r.latitude != null ? Number(r.latitude).toFixed(6) : "-";
     detLon.textContent = r.longitude != null ? Number(r.longitude).toFixed(6) : "-";
 
-    const hasCoords =
-      r.latitude != null &&
-      r.longitude != null &&
-      !Number.isNaN(Number(r.latitude)) &&
-      !Number.isNaN(Number(r.longitude));
+    const hasCoords = possuiCoordenadas(r);
     btnVerMapa.disabled = !hasCoords;
 
     if (r.status === "VALIDADO") {
@@ -930,6 +1052,7 @@
     }
 
     atualizarFotos(r);
+    atualizarDestaqueLinhaSelecionada();
     atualizarEstadoSelecao();
   }
 
@@ -1105,6 +1228,7 @@
           </td>
         </tr>
       `;
+      atualizarIndicadores([]);
       atualizarEstadoSelecao();
     }
   }
@@ -1187,6 +1311,7 @@
   });
 
   atualizarFotos(null);
+  atualizarIndicadores([]);
   atualizarEstadoSelecao();
   carregarRegistros();
 </script>
