@@ -490,8 +490,8 @@
         markInvalid(emailInput, "Informe um e-mail válido.");
         ok = false;
       }
-      if (!senha || senha.length < 6) {
-        markInvalid(senhaInput, "A senha deve ter pelo menos 6 caracteres.");
+      if (!senha || senha.length < 3) {
+        markInvalid(senhaInput, "A senha deve ter pelo menos 3 caracteres.");
         ok = false;
       }
       if (!ok) return;
