@@ -201,15 +201,15 @@
 
 </div>
 
-<div id="fotos-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm">
+<div id="detalhes-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm">
   <div class="w-full max-w-4xl mx-4 bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
     <div class="px-4 py-3 flex items-center justify-between border-b border-slate-800">
       <div>
-        <p class="text-sm font-semibold text-emerald-400">Registro Fotogr?fico</p>
-        <p id="fotos-subtitle" class="text-[11px] text-slate-400">Selecione um ponto no mapa</p>
+        <p class="text-sm font-semibold text-emerald-400">Detalhes do Registro</p>
+        <p id="detalhes-subtitle" class="text-[11px] text-slate-400">Selecione um ponto no mapa</p>
       </div>
       <button
-        id="btn-fechar-fotos"
+        id="btn-fechar-detalhes"
         type="button"
         class="px-2.5 py-1.5 rounded-lg border border-slate-700 text-[11px] text-slate-300 hover:border-emerald-400 hover:text-emerald-300 transition"
       >
@@ -217,39 +217,78 @@
       </button>
     </div>
     <div class="p-4 bg-slate-950 space-y-4">
-      <div id="fotos-empty" class="hidden text-center text-[11px] text-slate-500 py-8">
-        Nenhuma foto dispon?vel para este registro.
-      </div>
-
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="space-y-2">
-          <p class="text-[11px] uppercase tracking-wider text-slate-500">Animal</p>
-          <div class="foto-ratio relative w-full rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
-            <img id="foto-modal-animal" alt="Foto do animal" class="h-full w-full object-cover hidden" loading="lazy" />
-            <div id="foto-modal-animal-placeholder" class="absolute inset-0 flex items-center justify-center text-[10px] text-slate-500">
-              Sem foto
-            </div>
+          <p class="text-[11px] uppercase tracking-wider text-slate-500">Informacoes</p>
+          <div id="detalhes-list" class="space-y-2 text-[12px] text-slate-200"></div>
+        </div>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="text-[11px] uppercase tracking-wider text-slate-500">Registro Fotografico</p>
+            <span id="fotos-count" class="text-[10px] text-slate-500">0 foto(s)</span>
+          </div>
+          <p id="fotos-resumo" class="text-[11px] text-slate-500">Sem fotos para este registro.</p>
+          <button
+            id="btn-ver-fotos"
+            type="button"
+            class="px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 text-xs font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled
+          >
+            Ver fotos
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="fotos-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm">
+  <div class="w-full max-w-4xl mx-4 bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+    <div class="px-4 py-3 flex items-center justify-between border-b border-slate-800">
+      <div>
+        <p class="text-sm font-semibold text-emerald-400">Registro Fotografico</p>
+        <p id="fotos-subtitle" class="text-[11px] text-slate-400">-</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          id="btn-foto-anterior"
+          type="button"
+          class="px-2.5 py-1.5 rounded-lg border border-slate-700 text-[11px] text-slate-300 hover:border-emerald-400 hover:text-emerald-300 transition"
+          title="Foto anterior"
+        >
+          &larr;
+        </button>
+        <button
+          id="btn-foto-proxima"
+          type="button"
+          class="px-2.5 py-1.5 rounded-lg border border-slate-700 text-[11px] text-slate-300 hover:border-emerald-400 hover:text-emerald-300 transition"
+          title="Proxima foto"
+        >
+          &rarr;
+        </button>
+        <button
+          id="btn-fechar-fotos"
+          type="button"
+          class="px-2.5 py-1.5 rounded-lg border border-slate-700 text-[11px] text-slate-300 hover:border-emerald-400 hover:text-emerald-300 transition"
+        >
+          Fechar
+        </button>
+      </div>
+    </div>
+    <div class="p-4 bg-slate-950 space-y-3">
+      <div id="fotos-empty" class="hidden text-center text-[11px] text-slate-500 py-8">
+        Nenhuma foto disponivel para este registro.
+      </div>
+      <div id="fotos-carousel" class="space-y-3">
+        <div class="foto-ratio relative w-full rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
+          <img id="foto-carousel-img" alt="Foto do registro" class="h-full w-full object-contain hidden" loading="lazy" />
+          <div id="foto-carousel-placeholder" class="absolute inset-0 flex items-center justify-center text-[10px] text-slate-500">
+            Sem foto
           </div>
         </div>
-
-        <div class="space-y-2">
-          <p class="text-[11px] uppercase tracking-wider text-slate-500">Local</p>
-          <div class="foto-ratio relative w-full rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
-            <img id="foto-modal-local" alt="Foto do local" class="h-full w-full object-cover hidden" loading="lazy" />
-            <div id="foto-modal-local-placeholder" class="absolute inset-0 flex items-center justify-center text-[10px] text-slate-500">
-              Sem foto
-            </div>
-          </div>
-        </div>
-
-        <div class="md:col-span-2 space-y-2">
-          <p class="text-[11px] uppercase tracking-wider text-slate-500">Assinatura</p>
-          <div class="assinatura-ratio relative w-full rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
-            <img id="foto-modal-assinatura" alt="Assinatura do colaborador" class="h-full w-full object-contain hidden" loading="lazy" />
-            <div id="foto-modal-assinatura-placeholder" class="absolute inset-0 flex items-center justify-center text-[10px] text-slate-500">
-              Sem assinatura
-            </div>
-          </div>
+        <div class="flex items-center justify-between text-[11px] text-slate-400">
+          <span id="foto-carousel-label">-</span>
+          <span id="foto-carousel-index">0/0</span>
         </div>
       </div>
     </div>
@@ -297,19 +336,31 @@
     const tipoRegistro = document.getElementById('tipo-registro');
     const btnAplicar = document.getElementById('btn-aplicar');
     const btnLimpar = document.getElementById('btn-limpar');
+    const detalhesModal = document.getElementById('detalhes-modal');
+    const btnFecharDetalhes = document.getElementById('btn-fechar-detalhes');
+    const detalhesSubtitle = document.getElementById('detalhes-subtitle');
+    const detalhesList = document.getElementById('detalhes-list');
+    const fotosCount = document.getElementById('fotos-count');
+    const fotosResumo = document.getElementById('fotos-resumo');
+    const btnVerFotos = document.getElementById('btn-ver-fotos');
+
     const fotosModal = document.getElementById('fotos-modal');
     const btnFecharFotos = document.getElementById('btn-fechar-fotos');
+    const btnFotoAnterior = document.getElementById('btn-foto-anterior');
+    const btnFotoProxima = document.getElementById('btn-foto-proxima');
     const fotosSubtitle = document.getElementById('fotos-subtitle');
     const fotosEmpty = document.getElementById('fotos-empty');
-    const fotoModalAnimal = document.getElementById('foto-modal-animal');
-    const fotoModalLocal = document.getElementById('foto-modal-local');
-    const fotoModalAssinatura = document.getElementById('foto-modal-assinatura');
-    const fotoModalAnimalPlaceholder = document.getElementById('foto-modal-animal-placeholder');
-    const fotoModalLocalPlaceholder = document.getElementById('foto-modal-local-placeholder');
-    const fotoModalAssinaturaPlaceholder = document.getElementById('foto-modal-assinatura-placeholder');
+    const fotosCarousel = document.getElementById('fotos-carousel');
+    const fotoCarouselImg = document.getElementById('foto-carousel-img');
+    const fotoCarouselPlaceholder = document.getElementById('foto-carousel-placeholder');
+    const fotoCarouselLabel = document.getElementById('foto-carousel-label');
+    const fotoCarouselIndex = document.getElementById('foto-carousel-index');
 
     let registros = [];
     let registrosFiltrados = [];
+    let registroSelecionado = null;
+    let fotosAtuais = [];
+    let fotoIndex = 0;
 
     function parseDate(iso) {
       if (!iso) return null;
@@ -340,50 +391,135 @@
       return `/media/${v}`;
     }
 
-    function atualizarFoto(imgEl, placeholderEl, url) {
-      if (url) {
-        imgEl.src = url;
-        imgEl.classList.remove('hidden');
-        placeholderEl.classList.add('hidden');
-      } else {
-        imgEl.removeAttribute('src');
-        imgEl.classList.add('hidden');
-        placeholderEl.classList.remove('hidden');
-      }
+    function formatarData(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return String(iso);
+      return d.toLocaleDateString('pt-BR');
     }
 
-    function atualizarFotosModal(r) {
-      if (!r) {
-        atualizarFoto(fotoModalAnimal, fotoModalAnimalPlaceholder, null);
-        atualizarFoto(fotoModalLocal, fotoModalLocalPlaceholder, null);
-        atualizarFoto(fotoModalAssinatura, fotoModalAssinaturaPlaceholder, null);
-        fotosEmpty.classList.remove('hidden');
-        return;
-      }
+    function formatarNumero(valor) {
+      const num = Number(valor);
+      return Number.isFinite(num) ? num.toFixed(6) : '-';
+    }
 
+    function coletarFotos(r) {
+      if (!r) return [];
+      const fotos = [];
       const animalUrl = normalizarFotoPath(r.foto_animal_path);
       const localUrl = normalizarFotoPath(r.foto_local_path);
       const assinaturaUrl = normalizarFotoPath(r.assinatura_usuario);
 
-      atualizarFoto(fotoModalAnimal, fotoModalAnimalPlaceholder, animalUrl);
-      atualizarFoto(fotoModalLocal, fotoModalLocalPlaceholder, localUrl);
-      atualizarFoto(fotoModalAssinatura, fotoModalAssinaturaPlaceholder, assinaturaUrl);
+      if (animalUrl) fotos.push({ label: 'Animal', url: animalUrl });
+      if (localUrl) fotos.push({ label: 'Local', url: localUrl });
+      if (assinaturaUrl) fotos.push({ label: 'Assinatura', url: assinaturaUrl });
+      return fotos;
+    }
 
-      const total = [animalUrl, localUrl, assinaturaUrl].filter(Boolean).length;
-      if (total) {
-        fotosEmpty.classList.add('hidden');
+    function atualizarResumoFotos(r) {
+      fotosAtuais = coletarFotos(r);
+      fotosCount.textContent = `${fotosAtuais.length} foto(s)`;
+      if (fotosAtuais.length) {
+        const labels = fotosAtuais.map(f => f.label).join(', ');
+        fotosResumo.textContent = `Disponivel: ${labels}`;
+        btnVerFotos.disabled = false;
       } else {
-        fotosEmpty.classList.remove('hidden');
+        fotosResumo.textContent = 'Sem fotos para este registro.';
+        btnVerFotos.disabled = true;
       }
     }
 
-    function abrirFotosModal(r) {
-      if (!r || !fotosModal) return;
+    function limparDetalhes() {
+      detalhesList.innerHTML = '';
+    }
+
+    function adicionarDetalhe(label, value) {
+      const row = document.createElement('div');
+      row.className = 'flex items-start justify-between gap-3 border-b border-slate-800/60 pb-1';
+      const labelEl = document.createElement('span');
+      labelEl.className = 'text-[11px] text-slate-500';
+      labelEl.textContent = label;
+
+      const valueEl = document.createElement('span');
+      valueEl.className = 'text-[12px] text-slate-100 text-right break-words';
+      valueEl.textContent = value;
+
+      row.append(labelEl, valueEl);
+      detalhesList.appendChild(row);
+    }
+
+    function atualizarDetalhes(r) {
+      limparDetalhes();
+      if (!r) return;
+
+      adicionarDetalhe('ID', r.id ?? '-');
+      adicionarDetalhe('Projeto', r.projeto || '-');
+      adicionarDetalhe('Tipo', r.tipo || '-');
+      adicionarDetalhe('Especie', r.especie || '-');
+      adicionarDetalhe('Identificacao', r.identificacao || '-');
+      adicionarDetalhe('Colaborador', r.colaborador_nome || '-');
+      adicionarDetalhe('Data', formatarData(r.data_registro));
+      adicionarDetalhe('Status', r.status || '-');
+      adicionarDetalhe('Latitude', formatarNumero(r.latitude));
+      adicionarDetalhe('Longitude', formatarNumero(r.longitude));
+    }
+
+    function abrirDetalhesModal(r) {
+      if (!r || !detalhesModal) return;
+      registroSelecionado = r;
       const titulo = r.especie || r.identificacao || 'Registro';
       const proj = r.projeto || '-';
       const tipo = r.tipo || '-';
-      fotosSubtitle.textContent = `${titulo} • ${proj} • ${tipo}`;
-      atualizarFotosModal(r);
+      detalhesSubtitle.textContent = `${titulo} - ${proj} - ${tipo}`;
+      atualizarDetalhes(r);
+      atualizarResumoFotos(r);
+      detalhesModal.classList.remove('hidden');
+      detalhesModal.classList.add('flex');
+    }
+
+    function fecharDetalhesModal() {
+      if (!detalhesModal) return;
+      detalhesModal.classList.add('hidden');
+      detalhesModal.classList.remove('flex');
+    }
+
+    function atualizarCarousel() {
+      if (!fotosAtuais.length) {
+        fotoCarouselImg.removeAttribute('src');
+        fotoCarouselImg.classList.add('hidden');
+        fotoCarouselPlaceholder.classList.remove('hidden');
+        fotoCarouselLabel.textContent = '-';
+        fotoCarouselIndex.textContent = '0/0';
+        fotosEmpty.classList.remove('hidden');
+        fotosCarousel.classList.add('hidden');
+        btnFotoAnterior.classList.add('hidden');
+        btnFotoProxima.classList.add('hidden');
+        return;
+      }
+
+      const item = fotosAtuais[fotoIndex];
+      fotoCarouselImg.src = item.url;
+      fotoCarouselImg.classList.remove('hidden');
+      fotoCarouselPlaceholder.classList.add('hidden');
+      fotoCarouselLabel.textContent = item.label;
+      fotoCarouselIndex.textContent = `${fotoIndex + 1}/${fotosAtuais.length}`;
+      fotosEmpty.classList.add('hidden');
+      fotosCarousel.classList.remove('hidden');
+
+      const temMaisDeUma = fotosAtuais.length > 1;
+      btnFotoAnterior.classList.toggle('hidden', !temMaisDeUma);
+      btnFotoProxima.classList.toggle('hidden', !temMaisDeUma);
+    }
+
+    function abrirFotosModal() {
+      if (!registroSelecionado || !fotosModal) return;
+      const titulo = registroSelecionado.especie || registroSelecionado.identificacao || 'Registro';
+      const proj = registroSelecionado.projeto || '-';
+      const tipo = registroSelecionado.tipo || '-';
+      fotosSubtitle.textContent = `${titulo} - ${proj} - ${tipo}`;
+      fotosAtuais = coletarFotos(registroSelecionado);
+      fotoIndex = 0;
+      atualizarCarousel();
       fotosModal.classList.remove('hidden');
       fotosModal.classList.add('flex');
     }
@@ -393,6 +529,7 @@
       fotosModal.classList.add('hidden');
       fotosModal.classList.remove('flex');
     }
+
 
     function hasCoords(r) {
       const lat = Number(r.latitude);
@@ -610,7 +747,7 @@
             Tipo: ${r.tipo || '-'}
           </div>
         `);
-        marker.on('click', () => abrirFotosModal(r));
+        marker.on('click', () => abrirDetalhesModal(r));
         marker.addTo(markersLayer);
         points.push([lat, lon]);
       }
@@ -647,23 +784,44 @@
       }
     }
 
-    [
-      [fotoModalAnimal, fotoModalAnimalPlaceholder],
-      [fotoModalLocal, fotoModalLocalPlaceholder],
-      [fotoModalAssinatura, fotoModalAssinaturaPlaceholder]
-    ].forEach(([imgEl, placeholderEl]) => {
-      imgEl.addEventListener('error', () => {
-        imgEl.classList.add('hidden');
-        placeholderEl.classList.remove('hidden');
-      });
+    fotoCarouselImg.addEventListener('error', () => {
+      fotoCarouselImg.classList.add('hidden');
+      fotoCarouselPlaceholder.classList.remove('hidden');
+    });
+
+    btnVerFotos.addEventListener('click', () => {
+      if (!btnVerFotos.disabled) abrirFotosModal();
+    });
+
+    btnFotoAnterior.addEventListener('click', () => {
+      if (fotosAtuais.length <= 1) return;
+      fotoIndex = (fotoIndex - 1 + fotosAtuais.length) % fotosAtuais.length;
+      atualizarCarousel();
+    });
+
+    btnFotoProxima.addEventListener('click', () => {
+      if (fotosAtuais.length <= 1) return;
+      fotoIndex = (fotoIndex + 1) % fotosAtuais.length;
+      atualizarCarousel();
+    });
+
+    btnFecharDetalhes.addEventListener('click', fecharDetalhesModal);
+    detalhesModal.addEventListener('click', (ev) => {
+      if (ev.target === detalhesModal) fecharDetalhesModal();
     });
 
     btnFecharFotos.addEventListener('click', fecharFotosModal);
     fotosModal.addEventListener('click', (ev) => {
       if (ev.target === fotosModal) fecharFotosModal();
     });
+
     document.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Escape') fecharFotosModal();
+      if (ev.key !== 'Escape') return;
+      if (!fotosModal.classList.contains('hidden')) {
+        fecharFotosModal();
+      } else if (!detalhesModal.classList.contains('hidden')) {
+        fecharDetalhesModal();
+      }
     });
 
     btnAplicar.addEventListener('click', aplicarTudo);
@@ -675,7 +833,8 @@
       aplicarTudo();
     });
 
-    atualizarFotosModal(null);
+    limparDetalhes();
+    atualizarResumoFotos(null);
     carregarRegistros();
   </script>
 
