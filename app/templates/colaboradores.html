@@ -64,6 +64,17 @@ Colaboradores de campo
     color: #94a3b8;
     font-size: 11px;
   }
+  .dt-container .dt-layout-row:last-child {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .dt-container .dt-paging {
+    display: flex !important;
+    align-items: center;
+  }
 </style>
 {% endblock %}
 
@@ -430,11 +441,11 @@ Colaboradores de campo
 
     tabelaColaboradores = new DataTable(tableColaboradores, {
       paging: true,
-      pageLength: 10,
+      pageLength: 5,
       lengthMenu: [10, 25, 50, 100],
       searching: false,
       ordering: true,
-      info: false,
+      info: true,
       order: [[0, "asc"]],
       autoWidth: false,
       columnDefs: [
