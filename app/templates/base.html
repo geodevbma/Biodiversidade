@@ -361,6 +361,32 @@
       </main>
     </div>
   </div>
+  <script>
+    (function () {
+      const originalFetch = window.fetch.bind(window);
+
+      async function getUnauthorizedDetail(response) {
+        try {
+          const data = await response.clone().json();
+          if (typeof data?.detail === "string" && data.detail.trim()) {
+            return data.detail.trim();
+          }
+        } catch (_) {
+          // Resposta sem JSON.
+        }
+        return "Não autenticado.";
+      }
+
+      window.fetch = async (...args) => {
+        const response = await originalFetch(...args);
+        if (response.status === 401) {
+          const detail = await getUnauthorizedDetail(response);
+          window.location.href = `/?error=${encodeURIComponent(detail)}`;
+        }
+        return response;
+      };
+    })();
+  </script>
   {% block modals %}{% endblock %}
   {% block extra_scripts %}{% endblock %}
 </body>

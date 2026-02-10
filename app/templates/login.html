@@ -364,6 +364,8 @@
     const toast = document.getElementById("toast");
     const toastTitle = document.getElementById("toastTitle");
     const toastMsg = document.getElementById("toastMsg");
+    const urlParams = new URLSearchParams(window.location.search);
+    const loginError = urlParams.get("error");
 
     function showToast(title, message) {
       toastTitle.textContent = title;
@@ -435,6 +437,15 @@
     forgotBtn.addEventListener("click", () => {
       showToast("Recuperação de acesso", "Fale com o administrador para redefinição de senha.");
     });
+
+    if (loginError) {
+      errorBox.textContent = loginError;
+      errorBox.classList.remove("hidden");
+      showToast("Sessao encerrada", loginError);
+      if (window.history?.replaceState) {
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    }
 
 
 

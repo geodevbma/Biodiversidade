@@ -1,4 +1,7 @@
-from fastapi import FastAPI, Request, Depends
+from urllib.parse import quote
+
+from fastapi import FastAPI, Request, Depends, HTTPException, status
+from fastapi.exception_handlers import http_exception_handler as fastapi_http_exception_handler
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -24,6 +27,19 @@ app.include_router(auth.router)
 app.include_router(colaboradores.router)
 app.include_router(registros.router)
 app.include_router(registros_fauna.router)
+
+
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    # Sessao invalida/expirada em paginas de admin: volta para login com feedback.
+    if exc.status_code == status.HTTP_401_UNAUTHORIZED and request.url.path.startswith("/admin"):
+        detail = exc.detail if isinstance(exc.detail, str) and exc.detail.strip() else "N\u00e3o autenticado."
+        encoded = quote(detail, safe="")
+        response = RedirectResponse(url=f"/?error={encoded}", status_code=303)
+        response.delete_cookie("access_token")
+        return response
+
+    return await fastapi_http_exception_handler(request, exc)
 
 
 @app.on_event("startup")
