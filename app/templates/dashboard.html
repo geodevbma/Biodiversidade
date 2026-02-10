@@ -403,6 +403,53 @@
       return Number.isFinite(num) ? num.toFixed(6) : '-';
     }
 
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function gerarPopupHtml(r) {
+      const titulo = escapeHtml(r.especie || r.identificacao || 'Registro');
+      const id = escapeHtml(r.id ?? '-');
+      const projeto = escapeHtml(r.projeto || '-');
+      const tipo = escapeHtml(r.tipo || '-');
+      const especie = escapeHtml(r.especie || '-');
+      const identificacao = escapeHtml(r.identificacao || '-');
+      const data = escapeHtml(formatarData(r.data_registro));
+      const colaborador = escapeHtml(r.colaborador_nome || '-');
+      const status = escapeHtml(r.status || '-');
+      const lat = escapeHtml(formatarNumero(r.latitude));
+      const lon = escapeHtml(formatarNumero(r.longitude));
+      const fotosDisponiveis = coletarFotos(r).length > 0;
+
+      const btnClasses = fotosDisponiveis
+        ? 'w-full mt-2 px-2 py-1 rounded-md bg-emerald-500 text-slate-950 text-[11px] font-semibold'
+        : 'w-full mt-2 px-2 py-1 rounded-md bg-slate-700 text-slate-300 text-[11px] font-semibold cursor-not-allowed';
+
+      const btnDisabled = fotosDisponiveis ? '' : 'disabled';
+
+      return `
+        <div class="space-y-1 text-[11px] text-slate-800">
+          <div class="text-sm font-semibold text-slate-900">${titulo}</div>
+          <div><span class="text-slate-600">ID:</span> <span class="text-slate-900">${id}</span></div>
+          <div><span class="text-slate-600">Projeto:</span> <span class="text-slate-900">${projeto}</span></div>
+          <div><span class="text-slate-600">Tipo:</span> <span class="text-slate-900">${tipo}</span></div>
+          <div><span class="text-slate-600">Especie:</span> <span class="text-slate-900">${especie}</span></div>
+          <div><span class="text-slate-600">Identificacao:</span> <span class="text-slate-900">${identificacao}</span></div>
+          <div><span class="text-slate-600">Data:</span> <span class="text-slate-900">${data}</span></div>
+          <div><span class="text-slate-600">Colaborador:</span> <span class="text-slate-900">${colaborador}</span></div>
+          <div><span class="text-slate-600">Status:</span> <span class="text-slate-900">${status}</span></div>
+          <div><span class="text-slate-600">Lat:</span> <span class="text-slate-900">${lat}</span></div>
+          <div><span class="text-slate-600">Lon:</span> <span class="text-slate-900">${lon}</span></div>
+          <button class="popup-ver-fotos ${btnClasses}" ${btnDisabled}>Ver fotos</button>
+        </div>
+      `;
+    }
+
     function coletarFotos(r) {
       if (!r) return [];
       const fotos = [];
@@ -740,14 +787,21 @@
           fillColor: '#10b981',
           fillOpacity: 0.85
         });
-        marker.bindPopup(`
-          <div style="font-size:12px;">
-            <strong>${r.especie || r.identificacao || 'Registro'}</strong><br />
-            Projeto: ${r.projeto || '-'}<br />
-            Tipo: ${r.tipo || '-'}
-          </div>
-        `);
-        marker.on('click', () => abrirDetalhesModal(r));
+        marker.bindPopup(gerarPopupHtml(r));
+        marker.on('popupopen', (ev) => {
+          const popupEl = ev.popup ? ev.popup.getElement() : (marker.getPopup() ? marker.getPopup().getElement() : null);
+          if (!popupEl) return;
+          const btn = popupEl.querySelector('.popup-ver-fotos');
+          if (!btn || btn.dataset.bound) return;
+          btn.dataset.bound = '1';
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (btn.disabled) return;
+            registroSelecionado = r;
+            abrirFotosModal();
+          });
+        });
         marker.addTo(markersLayer);
         points.push([lat, lon]);
       }
