@@ -15,7 +15,6 @@
 <style>
   #mapa-fauna { height: 420px; width: 100%; }
   .foto-ratio { aspect-ratio: 4 / 3; }
-  .assinatura-ratio { aspect-ratio: 3 / 1; }
 </style>
 {% endblock %}
 
@@ -185,6 +184,10 @@
             <p class="text-slate-500">Destino</p>
             <p id="det-destino" class="font-medium text-slate-100">-</p>
           </div>
+          <div>
+            <p class="text-slate-500">Observacoes</p>
+            <p id="det-observacoes" class="font-medium text-slate-100 break-words">-</p>
+          </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <p class="text-slate-500">Latitude</p>
@@ -227,16 +230,6 @@
                 <div id="foto-local-placeholder" class="absolute inset-0 flex items-center justify-center text-[10px] text-slate-500">
                   Sem foto
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="space-y-1">
-            <p class="text-[11px] text-slate-500">Assinatura</p>
-            <div class="assinatura-ratio relative w-full rounded-lg border border-slate-800 bg-slate-900/60 overflow-hidden">
-              <img id="foto-assinatura" alt="Assinatura do colaborador" class="h-full w-full object-contain hidden" loading="lazy" />
-              <div id="foto-assinatura-placeholder" class="absolute inset-0 flex items-center justify-center text-[10px] text-slate-500">
-                Sem assinatura
               </div>
             </div>
           </div>
@@ -290,6 +283,7 @@
   const detPeriodo = document.getElementById("det-periodo");
   const detSaude = document.getElementById("det-saude");
   const detDestino = document.getElementById("det-destino");
+  const detObservacoes = document.getElementById("det-observacoes");
   const detData = document.getElementById("det-data");
   const detLat = document.getElementById("det-lat");
   const detLon = document.getElementById("det-lon");
@@ -301,10 +295,8 @@
   const detFotosCount = document.getElementById("det-fotos-count");
   const fotoAnimal = document.getElementById("foto-animal");
   const fotoLocal = document.getElementById("foto-local");
-  const fotoAssinatura = document.getElementById("foto-assinatura");
   const fotoAnimalPlaceholder = document.getElementById("foto-animal-placeholder");
   const fotoLocalPlaceholder = document.getElementById("foto-local-placeholder");
-  const fotoAssinaturaPlaceholder = document.getElementById("foto-assinatura-placeholder");
 
   let mapa = null;
   let mapaMarker = null;
@@ -358,27 +350,23 @@
     if (!r) {
       atualizarFoto(fotoAnimal, fotoAnimalPlaceholder, null);
       atualizarFoto(fotoLocal, fotoLocalPlaceholder, null);
-      atualizarFoto(fotoAssinatura, fotoAssinaturaPlaceholder, null);
       detFotosCount.textContent = "0 foto(s)";
       return;
     }
 
     const animalUrl = normalizarFotoPath(r.foto_animal_path);
     const localUrl = normalizarFotoPath(r.foto_local_path);
-    const assinaturaUrl = normalizarFotoPath(r.assinatura_usuario);
 
     atualizarFoto(fotoAnimal, fotoAnimalPlaceholder, animalUrl);
     atualizarFoto(fotoLocal, fotoLocalPlaceholder, localUrl);
-    atualizarFoto(fotoAssinatura, fotoAssinaturaPlaceholder, assinaturaUrl);
 
-    const total = [animalUrl, localUrl, assinaturaUrl].filter(Boolean).length;
+    const total = [animalUrl, localUrl].filter(Boolean).length;
     detFotosCount.textContent = `${total} foto(s)`;
   }
 
   [
     [fotoAnimal, fotoAnimalPlaceholder],
-    [fotoLocal, fotoLocalPlaceholder],
-    [fotoAssinatura, fotoAssinaturaPlaceholder]
+    [fotoLocal, fotoLocalPlaceholder]
   ].forEach(([imgEl, placeholderEl]) => {
     imgEl.addEventListener("error", () => {
       imgEl.classList.add("hidden");
@@ -481,6 +469,7 @@
     detPeriodo.textContent = r.periodo_resgate || "-";
     detSaude.textContent = r.estado_saude || "-";
     detDestino.textContent = r.destino || "-";
+    detObservacoes.textContent = r.observacoes || "-";
     detData.textContent = formatarData(r.data_captura);
     detLat.textContent = r.latitude != null ? Number(r.latitude).toFixed(6) : "-";
     detLon.textContent = r.longitude != null ? Number(r.longitude).toFixed(6) : "-";
