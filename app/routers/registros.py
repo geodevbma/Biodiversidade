@@ -49,6 +49,9 @@ def listar_registros(db: Session = Depends(get_db)):
             longitude=f.longitude,
             status=f.status,
             colaborador_nome=f.colaborador.nome if getattr(f, "colaborador", None) else None,
+            foto_animal_path=f.foto_animal_path,
+            foto_local_path=f.foto_local_path,
+            assinatura_usuario=f.assinatura_usuario,
         ).model_dump()
         result.append(data)
 

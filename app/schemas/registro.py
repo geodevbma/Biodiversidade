@@ -12,6 +12,9 @@ class RegistroOut(BaseModel):
     longitude: float | None = None
     status: str | None = None
     colaborador_nome: str | None = None
+    foto_animal_path: str | None = None
+    foto_local_path: str | None = None
+    assinatura_usuario: str | None = None
 
     class Config:
         from_attributes = True  # Pydantic v2

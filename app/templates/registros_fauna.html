@@ -14,6 +14,8 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
   #mapa-fauna { height: 420px; width: 100%; }
+  .foto-ratio { aspect-ratio: 4 / 3; }
+  .assinatura-ratio { aspect-ratio: 3 / 1; }
 </style>
 {% endblock %}
 
@@ -201,8 +203,43 @@
           </div>
         </div>
 
-        <div class="pt-4 border-t border-slate-800 mt-4 text-[11px] text-slate-500">
-          Esta secao sera integrada com fotos do registro nas proximas etapas.
+        <div class="pt-4 border-t border-slate-800 mt-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="text-[11px] uppercase tracking-wider text-slate-500">Fotos do registro</p>
+            <span id="det-fotos-count" class="text-[10px] text-slate-600">0 foto(s)</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <p class="text-[11px] text-slate-500">Animal</p>
+              <div class="foto-ratio relative w-full rounded-lg border border-slate-800 bg-slate-900/60 overflow-hidden">
+                <img id="foto-animal" alt="Foto do animal" class="h-full w-full object-cover hidden" loading="lazy" />
+                <div id="foto-animal-placeholder" class="absolute inset-0 flex items-center justify-center text-[10px] text-slate-500">
+                  Sem foto
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <p class="text-[11px] text-slate-500">Local</p>
+              <div class="foto-ratio relative w-full rounded-lg border border-slate-800 bg-slate-900/60 overflow-hidden">
+                <img id="foto-local" alt="Foto do local" class="h-full w-full object-cover hidden" loading="lazy" />
+                <div id="foto-local-placeholder" class="absolute inset-0 flex items-center justify-center text-[10px] text-slate-500">
+                  Sem foto
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <p class="text-[11px] text-slate-500">Assinatura</p>
+            <div class="assinatura-ratio relative w-full rounded-lg border border-slate-800 bg-slate-900/60 overflow-hidden">
+              <img id="foto-assinatura" alt="Assinatura do colaborador" class="h-full w-full object-contain hidden" loading="lazy" />
+              <div id="foto-assinatura-placeholder" class="absolute inset-0 flex items-center justify-center text-[10px] text-slate-500">
+                Sem assinatura
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -261,6 +298,13 @@
   const mapaModal = document.getElementById("mapa-modal");
   const btnFecharMapa = document.getElementById("btn-fechar-mapa");
   const mapaCoords = document.getElementById("mapa-coords");
+  const detFotosCount = document.getElementById("det-fotos-count");
+  const fotoAnimal = document.getElementById("foto-animal");
+  const fotoLocal = document.getElementById("foto-local");
+  const fotoAssinatura = document.getElementById("foto-assinatura");
+  const fotoAnimalPlaceholder = document.getElementById("foto-animal-placeholder");
+  const fotoLocalPlaceholder = document.getElementById("foto-local-placeholder");
+  const fotoAssinaturaPlaceholder = document.getElementById("foto-assinatura-placeholder");
 
   let mapa = null;
   let mapaMarker = null;
@@ -274,6 +318,73 @@
     if (Number.isNaN(d.getTime())) return iso;
     return d.toLocaleDateString("pt-BR");
   }
+
+  function normalizarFotoPath(valor) {
+    if (valor == null) return null;
+    let v = String(valor).trim();
+    if (!v || v === "-" || v.toLowerCase() === "null") return null;
+
+    if (/^data:image\//i.test(v)) return v;
+    if (/^https?:\/\//i.test(v)) return v;
+
+    if (/^[A-Za-z0-9+/=]+$/.test(v) && v.length > 200) {
+      return `data:image/png;base64,${v}`;
+    }
+
+    v = v.replace(/\\/g, "/");
+    const lower = v.toLowerCase();
+    const mediaIndex = lower.lastIndexOf("/media/");
+    if (mediaIndex >= 0) return v.slice(mediaIndex);
+
+    if (v.startsWith("/")) return v;
+    if (lower.startsWith("media/")) return `/${v}`;
+    if (lower.startsWith("fauna/")) return `/media/${v}`;
+    return `/media/${v}`;
+  }
+
+  function atualizarFoto(imgEl, placeholderEl, url) {
+    if (url) {
+      imgEl.src = url;
+      imgEl.classList.remove("hidden");
+      placeholderEl.classList.add("hidden");
+    } else {
+      imgEl.removeAttribute("src");
+      imgEl.classList.add("hidden");
+      placeholderEl.classList.remove("hidden");
+    }
+  }
+
+  function atualizarFotos(r) {
+    if (!r) {
+      atualizarFoto(fotoAnimal, fotoAnimalPlaceholder, null);
+      atualizarFoto(fotoLocal, fotoLocalPlaceholder, null);
+      atualizarFoto(fotoAssinatura, fotoAssinaturaPlaceholder, null);
+      detFotosCount.textContent = "0 foto(s)";
+      return;
+    }
+
+    const animalUrl = normalizarFotoPath(r.foto_animal_path);
+    const localUrl = normalizarFotoPath(r.foto_local_path);
+    const assinaturaUrl = normalizarFotoPath(r.assinatura_usuario);
+
+    atualizarFoto(fotoAnimal, fotoAnimalPlaceholder, animalUrl);
+    atualizarFoto(fotoLocal, fotoLocalPlaceholder, localUrl);
+    atualizarFoto(fotoAssinatura, fotoAssinaturaPlaceholder, assinaturaUrl);
+
+    const total = [animalUrl, localUrl, assinaturaUrl].filter(Boolean).length;
+    detFotosCount.textContent = `${total} foto(s)`;
+  }
+
+  [
+    [fotoAnimal, fotoAnimalPlaceholder],
+    [fotoLocal, fotoLocalPlaceholder],
+    [fotoAssinatura, fotoAssinaturaPlaceholder]
+  ].forEach(([imgEl, placeholderEl]) => {
+    imgEl.addEventListener("error", () => {
+      imgEl.classList.add("hidden");
+      placeholderEl.classList.remove("hidden");
+    });
+  });
 
   function aplicarFiltrosLocal() {
     const termo = buscaTexto.value.toLowerCase();
@@ -400,6 +511,8 @@
     } else {
       btnVerMapa.title = "";
     }
+
+    atualizarFotos(r);
   }
 
   function abrirMapa() {
@@ -473,6 +586,7 @@
     if (ev.target === mapaModal) fecharMapa();
   });
 
+  atualizarFotos(null);
   carregarRegistros();
 </script>
 {% endblock %}
