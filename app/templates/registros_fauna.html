@@ -93,7 +93,7 @@
             <span class="font-semibold text-slate-100">Registros de fauna</span>
             <span id="info-total" class="text-[11px] text-slate-500">Carregando registros...</span>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-center justify-end gap-2">
             <input
               id="busca-texto"
               type="text"
@@ -101,6 +101,28 @@
               class="w-52 md:w-64 bg-slate-950 border border-slate-700 text-[11px] text-slate-200 rounded-lg px-2 py-1.5
                      outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/30"
             />
+            <span id="info-selecao" class="text-[11px] text-slate-400">0 selecionado(s)</span>
+            <button
+              id="btn-exportar-pdf"
+              type="button"
+              class="px-2.5 py-1.5 rounded-lg border border-emerald-500/60 text-[11px] text-emerald-300 hover:bg-emerald-500/10 transition disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              PDF selecionados
+            </button>
+            <button
+              id="btn-exportar-excel-selecionados"
+              type="button"
+              class="px-2.5 py-1.5 rounded-lg border border-amber-500/60 text-[11px] text-amber-300 hover:bg-amber-500/10 transition disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Excel selecionados
+            </button>
+            <button
+              id="btn-exportar-excel-todos"
+              type="button"
+              class="px-2.5 py-1.5 rounded-lg border border-sky-500/60 text-[11px] text-sky-300 hover:bg-sky-500/10 transition"
+            >
+              Excel todos
+            </button>
           </div>
         </div>
 
@@ -108,6 +130,14 @@
           <table class="min-w-full text-xs">
             <thead class="bg-slate-900/90 border-b border-slate-800 text-[11px] uppercase tracking-wide text-slate-400">
               <tr>
+                <th class="px-3 py-2 text-center w-10">
+                  <input
+                    id="check-all-registros"
+                    type="checkbox"
+                    class="h-3.5 w-3.5 rounded border-slate-600 bg-slate-950 text-emerald-500 focus:ring-emerald-500/60"
+                    title="Selecionar todos visiveis"
+                  />
+                </th>
                 <th class="px-3 py-2 text-left">Data</th>
                 <th class="px-3 py-2 text-left">Animal</th>
                 <th class="px-3 py-2 text-left">Nome cientifico</th>
@@ -464,6 +494,11 @@
   const filtroMunicipio = document.getElementById("filtro-municipio");
   const btnAplicar = document.getElementById("btn-aplicar-filtros");
   const btnLimpar = document.getElementById("btn-limpar-filtros");
+  const infoSelecao = document.getElementById("info-selecao");
+  const checkAllRegistros = document.getElementById("check-all-registros");
+  const btnExportarPdf = document.getElementById("btn-exportar-pdf");
+  const btnExportarExcelSelecionados = document.getElementById("btn-exportar-excel-selecionados");
+  const btnExportarExcelTodos = document.getElementById("btn-exportar-excel-todos");
 
   const detId = document.getElementById("det-id");
   const detAnimal = document.getElementById("det-animal");
@@ -512,6 +547,8 @@
   let mapaMarker = null;
 
   let registros = [];
+  let registrosFiltrados = [];
+  const registrosSelecionados = new Set();
   let registroSelecionado = null;
   const detIdDefault = detId.textContent;
 
@@ -607,13 +644,114 @@
     });
   });
 
+  function normalizarId(id) {
+    if (id == null) return "";
+    return String(id).trim();
+  }
+
+  function getIdsSelecionados() {
+    return Array.from(registrosSelecionados)
+      .map((id) => Number(id))
+      .filter((id) => Number.isInteger(id));
+  }
+
+  function montarUrlExportacao(path, ids) {
+    const url = new URL(path, window.location.origin);
+    if (ids && ids.length) {
+      url.searchParams.set("ids", ids.join(","));
+    }
+    return url.toString();
+  }
+
+  function iniciarDownload(url) {
+    const link = document.createElement("a");
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
+  function atualizarEstadoSelecao() {
+    const totalSelecionados = registrosSelecionados.size;
+    const idsVisiveis = registrosFiltrados
+      .map((item) => normalizarId(item.id))
+      .filter(Boolean);
+    const totalVisiveis = idsVisiveis.length;
+    const selecionadosVisiveis = idsVisiveis.filter((id) => registrosSelecionados.has(id)).length;
+
+    infoSelecao.textContent = `${totalSelecionados} selecionado(s)`;
+    checkAllRegistros.disabled = totalVisiveis === 0;
+    checkAllRegistros.checked = totalVisiveis > 0 && selecionadosVisiveis === totalVisiveis;
+    checkAllRegistros.indeterminate =
+      selecionadosVisiveis > 0 && selecionadosVisiveis < totalVisiveis;
+
+    const hasRegistroDetalhe = Boolean(registroSelecionado && registroSelecionado.id != null);
+    btnExportarPdf.disabled = !totalSelecionados && !hasRegistroDetalhe;
+    btnExportarExcelSelecionados.disabled = !totalSelecionados;
+  }
+
+  function selecionarTodosVisiveis(selecionar) {
+    const idsVisiveis = registrosFiltrados
+      .map((item) => normalizarId(item.id))
+      .filter(Boolean);
+
+    for (const id of idsVisiveis) {
+      if (selecionar) {
+        registrosSelecionados.add(id);
+      } else {
+        registrosSelecionados.delete(id);
+      }
+    }
+
+    renderTabela(registrosFiltrados);
+  }
+
+  function exportarPdfSelecionados() {
+    const ids = getIdsSelecionados();
+
+    if (!ids.length && registroSelecionado && registroSelecionado.id != null) {
+      ids.push(Number(registroSelecionado.id));
+    }
+
+    if (!ids.length) {
+      alert("Selecione ao menos um registro para exportar PDF.");
+      return;
+    }
+
+    const url = montarUrlExportacao("/api/registros-fauna/admin/export/pdf", ids);
+    iniciarDownload(url);
+  }
+
+  function exportarPdfUnico(id) {
+    const parsed = Number(id);
+    if (!Number.isInteger(parsed)) return;
+    const url = montarUrlExportacao("/api/registros-fauna/admin/export/pdf", [parsed]);
+    iniciarDownload(url);
+  }
+
+  function exportarExcelSelecionados() {
+    const ids = getIdsSelecionados();
+    if (!ids.length) {
+      alert("Selecione ao menos um registro para exportar Excel.");
+      return;
+    }
+
+    const url = montarUrlExportacao("/api/registros-fauna/admin/export/excel", ids);
+    iniciarDownload(url);
+  }
+
+  function exportarExcelTodos() {
+    const url = montarUrlExportacao("/api/registros-fauna/admin/export/excel");
+    iniciarDownload(url);
+  }
+
   function aplicarFiltrosLocal() {
     const termo = buscaTexto.value.toLowerCase();
     const muni = filtroMunicipio.value;
     const dataIni = filtroDataInicio.value ? new Date(filtroDataInicio.value) : null;
     const dataFim = filtroDataFim.value ? new Date(filtroDataFim.value) : null;
 
-    let filtrados = registros.filter(r => {
+    registrosFiltrados = registros.filter((r) => {
       const textoAlvo = [
         r.nome_cientifico || "",
         r.municipio || "",
@@ -635,7 +773,7 @@
       return true;
     });
 
-    renderTabela(filtrados);
+    renderTabela(registrosFiltrados);
   }
 
   function renderTabela(lista) {
@@ -644,18 +782,28 @@
     if (!lista.length) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="7" class="px-3 py-4 text-center text-[11px] text-slate-500">
+          <td colspan="8" class="px-3 py-4 text-center text-[11px] text-slate-500">
             Nenhum registro encontrado com os filtros atuais.
           </td>
         </tr>
       `;
     } else {
       for (const r of lista) {
+        const idNormalizado = normalizarId(r.id);
+        const marcado = idNormalizado && registrosSelecionados.has(idNormalizado);
         const tr = document.createElement("tr");
         tr.className = "hover:bg-slate-900/70 transition cursor-pointer";
         tr.dataset.id = r.id ?? "";
 
         tr.innerHTML = `
+          <td class="px-3 py-2 align-middle text-center">
+            <input
+              type="checkbox"
+              class="checkbox-registro h-3.5 w-3.5 rounded border-slate-600 bg-slate-950 text-emerald-500 focus:ring-emerald-500/60"
+              data-id="${r.id}"
+              ${marcado ? "checked" : ""}
+            />
+          </td>
           <td class="px-3 py-2 align-middle text-[11px] text-slate-300">
             ${formatarData(r.data_captura)}
           </td>
@@ -691,6 +839,13 @@
                 Editar
               </button>
               <button
+                class="px-2 py-1 rounded-lg border border-sky-500/60 text-sky-300 hover:bg-sky-500/10 transition"
+                data-action="pdf"
+                data-id="${r.id}"
+              >
+                PDF
+              </button>
+              <button
                 class="px-2 py-1 rounded-lg border border-rose-500/60 text-rose-300 hover:bg-rose-500/10 transition"
                 data-action="delete"
                 data-id="${r.id}"
@@ -706,6 +861,7 @@
     }
 
     infoTotal.textContent = `${lista.length} registro(s) listado(s)`;
+    atualizarEstadoSelecao();
   }
 
   function selecionarRegistro(r) {
@@ -729,6 +885,7 @@
       btnVerMapa.disabled = true;
       btnVerMapa.title = "Sem coordenadas para este registro";
       atualizarFotos(null);
+      atualizarEstadoSelecao();
       return;
     }
     detId.textContent = `ID: ${r.id ?? "-"} (Disp: ${r.id_dispositivo || "-"})`;
@@ -773,6 +930,7 @@
     }
 
     atualizarFotos(r);
+    atualizarEstadoSelecao();
   }
 
   function abrirModalEdicao(r) {
@@ -877,6 +1035,7 @@
       const res = await fetch(`/api/registros-fauna/admin/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Erro ao excluir");
       registros = registros.filter((item) => item.id != id);
+      registrosSelecionados.delete(normalizarId(id));
       if (registroSelecionado && registroSelecionado.id == id) {
         selecionarRegistro(null);
       }
@@ -928,17 +1087,25 @@
       const res = await fetch("/api/registros-fauna/admin");
       if (!res.ok) throw new Error("Erro ao carregar");
       registros = await res.json();
+      const idsAtuais = new Set(registros.map((item) => normalizarId(item.id)).filter(Boolean));
+      for (const id of Array.from(registrosSelecionados)) {
+        if (!idsAtuais.has(id)) {
+          registrosSelecionados.delete(id);
+        }
+      }
       aplicarFiltrosLocal();
     } catch (err) {
       console.error(err);
       infoTotal.textContent = "Erro ao carregar registros.";
+      registrosFiltrados = [];
       tbody.innerHTML = `
         <tr>
-          <td colspan="7" class="px-3 py-4 text-center text-[11px] text-rose-400">
+          <td colspan="8" class="px-3 py-4 text-center text-[11px] text-rose-400">
             Erro ao carregar registros do servidor.
           </td>
         </tr>
       `;
+      atualizarEstadoSelecao();
     }
   }
 
@@ -952,7 +1119,33 @@
     aplicarFiltrosLocal();
   });
 
+  checkAllRegistros.addEventListener("change", () => {
+    selecionarTodosVisiveis(checkAllRegistros.checked);
+  });
+
+  btnExportarPdf.addEventListener("click", exportarPdfSelecionados);
+  btnExportarExcelSelecionados.addEventListener("click", exportarExcelSelecionados);
+  btnExportarExcelTodos.addEventListener("click", exportarExcelTodos);
+
+  tbody.addEventListener("change", (ev) => {
+    const checkbox = ev.target.closest(".checkbox-registro");
+    if (!checkbox) return;
+
+    const id = normalizarId(checkbox.getAttribute("data-id"));
+    if (!id) return;
+
+    if (checkbox.checked) {
+      registrosSelecionados.add(id);
+    } else {
+      registrosSelecionados.delete(id);
+    }
+
+    atualizarEstadoSelecao();
+  });
+
   tbody.addEventListener("click", (ev) => {
+    if (ev.target.closest(".checkbox-registro")) return;
+
     const btn = ev.target.closest("button");
     if (btn) {
       const id = btn.getAttribute("data-id");
@@ -963,6 +1156,8 @@
       if (action === "edit") {
         selecionarRegistro(registro);
         abrirModalEdicao(registro);
+      } else if (action === "pdf") {
+        exportarPdfUnico(id);
       } else if (action === "delete") {
         excluirRegistro(id, registro);
       } else {
@@ -992,6 +1187,7 @@
   });
 
   atualizarFotos(null);
+  atualizarEstadoSelecao();
   carregarRegistros();
 </script>
 {% endblock %}

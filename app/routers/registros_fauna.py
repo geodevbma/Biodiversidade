@@ -1,10 +1,20 @@
 import json
 import shutil
 import uuid
+from datetime import datetime
+from io import BytesIO
 from pathlib import Path
+from xml.sax.saxutils import escape
 
-from fastapi import APIRouter, Depends, UploadFile, File, Form, Request, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, UploadFile, File, Form, Request, HTTPException, Query, status
+from fastapi.responses import StreamingResponse
+from openpyxl import Workbook
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import mm
+from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from sqlalchemy.orm import Session, joinedload
 
 from app.db.session import get_db
 from app.deps import get_current_colaborador, require_admin
@@ -24,6 +34,198 @@ router = APIRouter(
 MEDIA_ROOT = Path(__file__).resolve().parents[1] / "media"
 FAUNA_ROOT = MEDIA_ROOT / "fauna"
 
+EXPORT_COLUNAS = [
+    ("ID", "id"),
+    ("ID Dispositivo", "id_dispositivo"),
+    ("Animal", "animal_number"),
+    ("Nome cientifico", "nome_cientifico"),
+    ("Data captura", "data_captura"),
+    ("Biologo responsavel", "biologo_responsavel"),
+    ("Municipio", "municipio"),
+    ("Local captura", "local_captura"),
+    ("Periodo resgate", "periodo_resgate"),
+    ("Estado saude", "estado_saude"),
+    ("Destino", "destino"),
+    ("Observacoes", "observacoes"),
+    ("Latitude", "latitude"),
+    ("Longitude", "longitude"),
+    ("Status", "status"),
+    ("Colaborador", "colaborador_nome"),
+]
+
+
+def _parse_ids_param(ids_raw: str | None) -> list[int] | None:
+    if ids_raw is None:
+        return None
+
+    cleaned = ids_raw.strip()
+    if not cleaned:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Parametro ids vazio.",
+        )
+
+    parsed: list[int] = []
+    for token in cleaned.split(","):
+        token = token.strip()
+        if not token:
+            continue
+        if not token.isdigit():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"ID invalido: {token}",
+            )
+        parsed.append(int(token))
+
+    if not parsed:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Informe ao menos um ID valido.",
+        )
+
+    return sorted(set(parsed))
+
+
+def _format_value(value) -> str:
+    if value is None:
+        return "-"
+    if isinstance(value, bool):
+        return "Sim" if value else "Nao"
+    if isinstance(value, datetime):
+        return value.strftime("%d/%m/%Y %H:%M:%S")
+    if isinstance(value, float):
+        return f"{value:.6f}"
+    text = str(value).strip()
+    return text or "-"
+
+
+def _registro_to_export_dict(registro: RegistroFauna) -> dict[str, str]:
+    return {
+        "id": _format_value(registro.id),
+        "id_dispositivo": _format_value(registro.id_dispositivo),
+        "animal_number": _format_value(registro.animal_number),
+        "nome_cientifico": _format_value(registro.nome_cientifico),
+        "data_captura": _format_value(registro.data_captura),
+        "biologo_responsavel": _format_value(registro.biologo_responsavel),
+        "municipio": _format_value(registro.municipio),
+        "local_captura": _format_value(registro.local_captura),
+        "periodo_resgate": _format_value(registro.periodo_resgate),
+        "estado_saude": _format_value(registro.estado_saude),
+        "destino": _format_value(registro.destino),
+        "observacoes": _format_value(registro.observacoes),
+        "latitude": _format_value(registro.latitude),
+        "longitude": _format_value(registro.longitude),
+        "status": _format_value(registro.status),
+        "colaborador_nome": _format_value(
+            registro.colaborador.nome if getattr(registro, "colaborador", None) else None
+        ),
+    }
+
+
+def _buscar_registros_para_exportacao(db: Session, ids: list[int] | None) -> list[RegistroFauna]:
+    query = db.query(RegistroFauna).options(joinedload(RegistroFauna.colaborador))
+    if ids:
+        query = query.filter(RegistroFauna.id.in_(ids))
+    registros = query.order_by(RegistroFauna.id.desc()).all()
+
+    if not registros:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Nenhum registro encontrado para exportacao.",
+        )
+
+    return registros
+
+
+def _gerar_nome_arquivo(base: str, ext: str, ids: list[int] | None) -> str:
+    sufixo = "selecionados" if ids else "todos"
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"{base}_{sufixo}_{stamp}.{ext}"
+
+
+def _gerar_excel_registros(registros: list[RegistroFauna]) -> BytesIO:
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Registros Fauna"
+
+    headers = [coluna[0] for coluna in EXPORT_COLUNAS]
+    ws.append(headers)
+
+    for r in registros:
+        export_data = _registro_to_export_dict(r)
+        ws.append([export_data.get(coluna[1], "-") for coluna in EXPORT_COLUNAS])
+
+    ws.freeze_panes = "A2"
+
+    for idx, header in enumerate(headers, start=1):
+        col_letter = ws.cell(row=1, column=idx).column_letter
+        largura_base = max(len(header) + 2, 14)
+        ws.column_dimensions[col_letter].width = min(largura_base + 8, 52)
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output
+
+
+def _gerar_pdf_registros(registros: list[RegistroFauna]) -> BytesIO:
+    output = BytesIO()
+    doc = SimpleDocTemplate(
+        output,
+        pagesize=A4,
+        leftMargin=12 * mm,
+        rightMargin=12 * mm,
+        topMargin=12 * mm,
+        bottomMargin=12 * mm,
+        title="Registros de Fauna",
+    )
+
+    styles = getSampleStyleSheet()
+    body_style = styles["BodyText"]
+    story = []
+
+    for idx, r in enumerate(registros):
+        export_data = _registro_to_export_dict(r)
+        story.append(Paragraph(f"<b>Registro de Fauna #{escape(export_data['id'])}</b>", styles["Heading3"]))
+        story.append(
+            Paragraph(
+                f"Gerado em {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}",
+                body_style,
+            )
+        )
+        story.append(Spacer(1, 6))
+
+        table_data = [[Paragraph("<b>Campo</b>", body_style), Paragraph("<b>Valor</b>", body_style)]]
+        for titulo, key in EXPORT_COLUNAS:
+            valor = escape(export_data.get(key, "-"))
+            table_data.append([Paragraph(escape(titulo), body_style), Paragraph(valor, body_style)])
+
+        table = Table(table_data, colWidths=[52 * mm, 124 * mm], repeatRows=1)
+        table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#E2E8F0")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#0F172A")),
+                    ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#CBD5E1")),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 5),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+                    ("TOPPADDING", (0, 0), (-1, -1), 3),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+                ]
+            )
+        )
+        story.append(table)
+
+        if idx < len(registros) - 1:
+            story.append(PageBreak())
+
+    doc.build(story)
+    output.seek(0)
+    return output
+
+
 @router.get("/admin", response_model=list[RegistroFaunaOut], dependencies=[Depends(require_admin)])
 def listar_registros_fauna_admin(db: Session = Depends(get_db)):
     registros = (
@@ -40,6 +242,40 @@ def listar_registros_fauna_admin(db: Session = Depends(get_db)):
         result.append(data)
 
     return result
+
+
+@router.get("/admin/export/pdf", dependencies=[Depends(require_admin)])
+def exportar_registros_fauna_pdf(
+    ids: str | None = Query(default=None, description="Lista de IDs separados por virgula."),
+    db: Session = Depends(get_db),
+):
+    ids_parsed = _parse_ids_param(ids)
+    registros = _buscar_registros_para_exportacao(db, ids_parsed)
+    pdf_bytes = _gerar_pdf_registros(registros)
+    file_name = _gerar_nome_arquivo("registros_fauna", "pdf", ids_parsed)
+
+    return StreamingResponse(
+        pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{file_name}"'},
+    )
+
+
+@router.get("/admin/export/excel", dependencies=[Depends(require_admin)])
+def exportar_registros_fauna_excel(
+    ids: str | None = Query(default=None, description="Lista de IDs separados por virgula."),
+    db: Session = Depends(get_db),
+):
+    ids_parsed = _parse_ids_param(ids)
+    registros = _buscar_registros_para_exportacao(db, ids_parsed)
+    excel_bytes = _gerar_excel_registros(registros)
+    file_name = _gerar_nome_arquivo("registros_fauna", "xlsx", ids_parsed)
+
+    return StreamingResponse(
+        excel_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{file_name}"'},
+    )
 
 
 @router.put("/admin/{registro_id}", response_model=RegistroFaunaOut, dependencies=[Depends(require_admin)])
