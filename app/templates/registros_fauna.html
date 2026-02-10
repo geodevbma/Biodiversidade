@@ -239,6 +239,197 @@
   </div>
 </div>
 
+<div id="modal-edicao" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm">
+  <div class="w-full max-w-3xl mx-4 bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+    <div class="px-4 py-3 flex items-center justify-between border-b border-slate-800">
+      <div>
+        <p class="text-sm font-semibold text-slate-100">Editar registro de fauna</p>
+        <p class="text-[11px] text-slate-400">Atualize as informacoes do registro.</p>
+      </div>
+      <button
+        id="btn-fechar-edicao"
+        type="button"
+        class="px-2.5 py-1.5 rounded-lg border border-slate-700 text-[11px] text-slate-300 hover:border-emerald-400 hover:text-emerald-300 transition"
+      >
+        Fechar
+      </button>
+    </div>
+
+    <form id="form-edicao" class="px-4 py-4 space-y-3">
+      <input type="hidden" id="edit-id" />
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="space-y-1">
+          <label for="edit-animal" class="text-[11px] text-slate-400">Animal</label>
+          <input
+            id="edit-animal"
+            type="text"
+            class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+                   outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
+          />
+        </div>
+        <div class="space-y-1">
+          <label for="edit-data" class="text-[11px] text-slate-400">Data de captura</label>
+          <input
+            id="edit-data"
+            type="date"
+            class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+                   outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
+          />
+        </div>
+      </div>
+
+      <div class="space-y-1">
+        <label for="edit-especie" class="text-[11px] text-slate-400">Nome cientifico</label>
+        <input
+          id="edit-especie"
+          type="text"
+          class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+                 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
+        />
+      </div>
+
+      <div class="space-y-1">
+        <label for="edit-biologo" class="text-[11px] text-slate-400">Biologo responsavel</label>
+        <input
+          id="edit-biologo"
+          type="text"
+          class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+                 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
+        />
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="space-y-1">
+          <label for="edit-municipio" class="text-[11px] text-slate-400">Municipio</label>
+          <input
+            id="edit-municipio"
+            type="text"
+            class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+                   outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
+          />
+        </div>
+        <div class="space-y-1">
+          <label for="edit-local" class="text-[11px] text-slate-400">Local de captura</label>
+          <input
+            id="edit-local"
+            type="text"
+            class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+                   outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
+          />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="space-y-1">
+          <label for="edit-periodo" class="text-[11px] text-slate-400">Periodo</label>
+          <select
+            id="edit-periodo"
+            class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+                   outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
+          >
+            <option value="">-</option>
+            <option value="Manha">Manha</option>
+            <option value="Tarde">Tarde</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label for="edit-saude" class="text-[11px] text-slate-400">Estado de saude</label>
+          <select
+            id="edit-saude"
+            class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+                   outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
+          >
+            <option value="">-</option>
+            <option value="Sao">Sadio</option>
+            <option value="Ferido">Ferido</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label for="edit-destino" class="text-[11px] text-slate-400">Destino</label>
+          <select
+            id="edit-destino"
+            class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+                   outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
+          >
+            <option value="">-</option>
+            <option value="Soltura">Soltura</option>
+            <option value="Centro de triagem">Centro de triagem</option>
+            <option value="Obito">Obito</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="space-y-1">
+        <label for="edit-observacoes" class="text-[11px] text-slate-400">Observacoes</label>
+        <textarea
+          id="edit-observacoes"
+          rows="3"
+          class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+                 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
+        ></textarea>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="space-y-1">
+          <label for="edit-lat" class="text-[11px] text-slate-400">Latitude</label>
+          <input
+            id="edit-lat"
+            type="number"
+            step="0.000001"
+            class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+                   outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
+          />
+        </div>
+        <div class="space-y-1">
+          <label for="edit-lon" class="text-[11px] text-slate-400">Longitude</label>
+          <input
+            id="edit-lon"
+            type="number"
+            step="0.000001"
+            class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+                   outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
+          />
+        </div>
+        <div class="space-y-1">
+          <label for="edit-status" class="text-[11px] text-slate-400">Status</label>
+          <select
+            id="edit-status"
+            class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1.5
+                   outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
+          >
+            <option value="">-</option>
+            <option value="SINCRONIZADO">Sincronizado</option>
+            <option value="PENDENTE">Pendente</option>
+            <option value="VALIDADO">Validado</option>
+          </select>
+        </div>
+      </div>
+
+      <p id="edit-error" class="hidden text-[11px] text-rose-400 bg-rose-500/10 border border-rose-500/40 rounded-lg px-3 py-2">
+        Erro ao salvar as alteracoes.
+      </p>
+
+      <div class="pt-2 flex justify-end gap-2">
+        <button
+          type="button"
+          id="btn-cancelar-edicao"
+          class="px-3 py-2 text-xs rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-900/80"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          id="btn-salvar-edicao"
+          class="px-4 py-2 text-xs rounded-lg bg-emerald-500 text-slate-950 font-semibold hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-all"
+        >
+          Salvar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div id="mapa-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm">
   <div class="w-full max-w-3xl mx-4 bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
     <div class="px-4 py-3 flex items-center justify-between border-b border-slate-800">
@@ -297,18 +488,60 @@
   const fotoLocal = document.getElementById("foto-local");
   const fotoAnimalPlaceholder = document.getElementById("foto-animal-placeholder");
   const fotoLocalPlaceholder = document.getElementById("foto-local-placeholder");
+  const modalEdicao = document.getElementById("modal-edicao");
+  const btnFecharEdicao = document.getElementById("btn-fechar-edicao");
+  const btnCancelarEdicao = document.getElementById("btn-cancelar-edicao");
+  const formEdicao = document.getElementById("form-edicao");
+  const editId = document.getElementById("edit-id");
+  const editAnimal = document.getElementById("edit-animal");
+  const editData = document.getElementById("edit-data");
+  const editEspecie = document.getElementById("edit-especie");
+  const editBiologo = document.getElementById("edit-biologo");
+  const editMunicipio = document.getElementById("edit-municipio");
+  const editLocal = document.getElementById("edit-local");
+  const editPeriodo = document.getElementById("edit-periodo");
+  const editSaude = document.getElementById("edit-saude");
+  const editDestino = document.getElementById("edit-destino");
+  const editObservacoes = document.getElementById("edit-observacoes");
+  const editLat = document.getElementById("edit-lat");
+  const editLon = document.getElementById("edit-lon");
+  const editStatus = document.getElementById("edit-status");
+  const editError = document.getElementById("edit-error");
 
   let mapa = null;
   let mapaMarker = null;
 
   let registros = [];
   let registroSelecionado = null;
+  const detIdDefault = detId.textContent;
 
   function formatarData(iso) {
     if (!iso) return "-";
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return iso;
     return d.toLocaleDateString("pt-BR");
+  }
+
+  function formatarDataInput(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "";
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+  }
+
+  function toIsoFromDateInput(value) {
+    if (!value) return null;
+    const d = new Date(`${value}T00:00:00Z`);
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toISOString();
+  }
+
+  function parseOptionalFloat(value) {
+    const raw = String(value ?? "").trim();
+    if (!raw) return null;
+    const num = Number(raw.replace(",", "."));
+    return Number.isFinite(num) ? num : null;
   }
 
   function normalizarFotoPath(valor) {
@@ -420,6 +653,7 @@
       for (const r of lista) {
         const tr = document.createElement("tr");
         tr.className = "hover:bg-slate-900/70 transition cursor-pointer";
+        tr.dataset.id = r.id ?? "";
 
         tr.innerHTML = `
           <td class="px-3 py-2 align-middle text-[11px] text-slate-300">
@@ -441,16 +675,32 @@
             ${r.colaborador_nome || "-"}
           </td>
           <td class="px-3 py-2 align-middle text-right text-[11px]">
-            <button
-              class="px-2 py-1 rounded-lg border border-slate-700 text-slate-200 hover:border-emerald-400 hover:text-emerald-300 transition"
-              data-id="${r.id}"
-            >
-              Detalhes
-            </button>
+            <div class="inline-flex items-center gap-1">
+              <button
+                class="px-2 py-1 rounded-lg border border-slate-700 text-slate-200 hover:border-emerald-400 hover:text-emerald-300 transition"
+                data-action="details"
+                data-id="${r.id}"
+              >
+                Detalhes
+              </button>
+              <button
+                class="px-2 py-1 rounded-lg border border-slate-700 text-slate-200 hover:border-amber-400 hover:text-amber-300 transition"
+                data-action="edit"
+                data-id="${r.id}"
+              >
+                Editar
+              </button>
+              <button
+                class="px-2 py-1 rounded-lg border border-rose-500/60 text-rose-300 hover:bg-rose-500/10 transition"
+                data-action="delete"
+                data-id="${r.id}"
+              >
+                Excluir
+              </button>
+            </div>
           </td>
         `;
 
-        tr.addEventListener("click", () => selecionarRegistro(r));
         tbody.appendChild(tr);
       }
     }
@@ -460,6 +710,27 @@
 
   function selecionarRegistro(r) {
     registroSelecionado = r;
+    if (!r) {
+      detId.textContent = detIdDefault;
+      detAnimal.textContent = "-";
+      detEspecie.textContent = "-";
+      detBiologo.textContent = "-";
+      detMunicipio.textContent = "-";
+      detLocal.textContent = "-";
+      detPeriodo.textContent = "-";
+      detSaude.textContent = "-";
+      detDestino.textContent = "-";
+      detObservacoes.textContent = "-";
+      detData.textContent = "-";
+      detLat.textContent = "-";
+      detLon.textContent = "-";
+      detStatus.textContent = "-";
+      detStatus.className = "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-200";
+      btnVerMapa.disabled = true;
+      btnVerMapa.title = "Sem coordenadas para este registro";
+      atualizarFotos(null);
+      return;
+    }
     detId.textContent = `ID: ${r.id ?? "-"} (Disp: ${r.id_dispositivo || "-"})`;
     detAnimal.textContent = r.animal_number || "-";
     detEspecie.textContent = r.nome_cientifico || "-";
@@ -502,6 +773,118 @@
     }
 
     atualizarFotos(r);
+  }
+
+  function abrirModalEdicao(r) {
+    if (!r) return;
+    editError.classList.add("hidden");
+    editId.value = r.id ?? "";
+    editAnimal.value = r.animal_number || "";
+    editData.value = formatarDataInput(r.data_captura);
+    editEspecie.value = r.nome_cientifico || "";
+    editBiologo.value = r.biologo_responsavel || "";
+    editMunicipio.value = r.municipio || "";
+    editLocal.value = r.local_captura || "";
+    editPeriodo.value = r.periodo_resgate || "";
+    editSaude.value = r.estado_saude || "";
+    editDestino.value = r.destino || "";
+    editObservacoes.value = r.observacoes || "";
+    editLat.value = r.latitude != null ? String(r.latitude) : "";
+    editLon.value = r.longitude != null ? String(r.longitude) : "";
+    editStatus.value = r.status || "";
+
+    modalEdicao.classList.remove("hidden");
+    modalEdicao.classList.add("flex");
+  }
+
+  function fecharModalEdicao() {
+    modalEdicao.classList.add("hidden");
+    modalEdicao.classList.remove("flex");
+  }
+
+  function atualizarRegistroNaLista(atualizado) {
+    if (!atualizado || atualizado.id == null) return null;
+    const idx = registros.findIndex((item) => item.id == atualizado.id);
+    if (idx >= 0) {
+      registros[idx] = { ...registros[idx], ...atualizado };
+      return registros[idx];
+    }
+    registros.push(atualizado);
+    return atualizado;
+  }
+
+  async function salvarEdicao(ev) {
+    ev.preventDefault();
+    editError.classList.add("hidden");
+
+    const id = editId.value;
+    if (!id) return;
+
+    const payload = {
+      animal_number: editAnimal.value.trim() || null,
+      nome_cientifico: editEspecie.value.trim() || null,
+      data_captura: toIsoFromDateInput(editData.value),
+      biologo_responsavel: editBiologo.value.trim() || null,
+      municipio: editMunicipio.value.trim() || null,
+      local_captura: editLocal.value.trim() || null,
+      periodo_resgate: editPeriodo.value || null,
+      estado_saude: editSaude.value || null,
+      destino: editDestino.value || null,
+      observacoes: editObservacoes.value.trim() || null,
+      latitude: parseOptionalFloat(editLat.value),
+      longitude: parseOptionalFloat(editLon.value),
+      status: editStatus.value || null,
+    };
+
+    try {
+      const res = await fetch(`/api/registros-fauna/admin/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        let errorText = "Erro ao salvar as alteracoes.";
+        try {
+          const err = await res.json();
+          if (typeof err.detail === "string") {
+            errorText = err.detail;
+          }
+        } catch (_) {
+          // Mantem mensagem padrao.
+        }
+        editError.textContent = errorText;
+        editError.classList.remove("hidden");
+        return;
+      }
+
+      const atualizado = await res.json();
+      const item = atualizarRegistroNaLista(atualizado);
+      aplicarFiltrosLocal();
+      selecionarRegistro(item || atualizado);
+      fecharModalEdicao();
+    } catch (err) {
+      console.error(err);
+      editError.textContent = "Erro ao salvar as alteracoes.";
+      editError.classList.remove("hidden");
+    }
+  }
+
+  async function excluirRegistro(id, registro) {
+    const label = registro?.animal_number || registro?.id || id;
+    if (!confirm(`Excluir o registro "${label}"?`)) return;
+    try {
+      const res = await fetch(`/api/registros-fauna/admin/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Erro ao excluir");
+      registros = registros.filter((item) => item.id != id);
+      if (registroSelecionado && registroSelecionado.id == id) {
+        selecionarRegistro(null);
+      }
+      aplicarFiltrosLocal();
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao excluir registro.");
+    }
   }
 
   function abrirMapa() {
@@ -567,6 +950,39 @@
     filtroMunicipio.value = "";
     buscaTexto.value = "";
     aplicarFiltrosLocal();
+  });
+
+  tbody.addEventListener("click", (ev) => {
+    const btn = ev.target.closest("button");
+    if (btn) {
+      const id = btn.getAttribute("data-id");
+      const action = btn.getAttribute("data-action") || "details";
+      const registro = registros.find((item) => item.id == id);
+      if (!registro) return;
+
+      if (action === "edit") {
+        selecionarRegistro(registro);
+        abrirModalEdicao(registro);
+      } else if (action === "delete") {
+        excluirRegistro(id, registro);
+      } else {
+        selecionarRegistro(registro);
+      }
+      return;
+    }
+
+    const row = ev.target.closest("tr");
+    if (!row) return;
+    const id = row.dataset.id;
+    const registro = registros.find((item) => item.id == id);
+    if (registro) selecionarRegistro(registro);
+  });
+
+  formEdicao.addEventListener("submit", salvarEdicao);
+  btnFecharEdicao.addEventListener("click", fecharModalEdicao);
+  btnCancelarEdicao.addEventListener("click", fecharModalEdicao);
+  modalEdicao.addEventListener("click", (ev) => {
+    if (ev.target === modalEdicao) fecharModalEdicao();
   });
 
   btnVerMapa.addEventListener("click", abrirMapa);

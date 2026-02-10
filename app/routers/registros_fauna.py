@@ -10,7 +10,11 @@ from app.db.session import get_db
 from app.deps import get_current_colaborador, require_admin
 from app.models.colaborador import ColaboradorCampo
 from app.models.registro_fauna import RegistroFauna
-from app.schemas.registro_fauna import RegistroFaunaIn, RegistroFaunaOut
+from app.schemas.registro_fauna import (
+    RegistroFaunaIn,
+    RegistroFaunaOut,
+    RegistroFaunaUpdate,
+)
 
 router = APIRouter(
     prefix="/api/registros-fauna",
@@ -36,6 +40,47 @@ def listar_registros_fauna_admin(db: Session = Depends(get_db)):
         result.append(data)
 
     return result
+
+
+@router.put("/admin/{registro_id}", response_model=RegistroFaunaOut, dependencies=[Depends(require_admin)])
+def atualizar_registro_fauna_admin(
+    registro_id: int,
+    data: RegistroFaunaUpdate,
+    db: Session = Depends(get_db),
+):
+    registro = db.query(RegistroFauna).get(registro_id)
+    if not registro:
+        raise HTTPException(status_code=404, detail="Registro nao encontrado.")
+
+    update_data = data.dict(exclude_unset=True)
+    payload_json = update_data.pop("payload_json", None)
+    if payload_json is not None:
+        update_data["payload_json"] = json.dumps(payload_json, ensure_ascii=False)
+
+    for field, value in update_data.items():
+        setattr(registro, field, value)
+
+    db.commit()
+    db.refresh(registro)
+
+    result = RegistroFaunaOut.model_validate(registro, from_attributes=True).model_dump()
+    if getattr(registro, "colaborador", None):
+        result["colaborador_nome"] = registro.colaborador.nome
+    return result
+
+
+@router.delete("/admin/{registro_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
+def excluir_registro_fauna_admin(
+    registro_id: int,
+    db: Session = Depends(get_db),
+):
+    registro = db.query(RegistroFauna).get(registro_id)
+    if not registro:
+        raise HTTPException(status_code=404, detail="Registro nao encontrado.")
+
+    db.delete(registro)
+    db.commit()
+    return None
 
 
 @router.post("", response_model=RegistroFaunaOut)
