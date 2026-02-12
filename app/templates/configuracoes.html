@@ -26,7 +26,7 @@ Configurações
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-base font-semibold">Aparência</h2>
-          <p class="text-xs text-slate-400">Escolha tema, densidade e fonte.</p>
+          <p class="text-xs text-slate-400">Escolha modo, tema, densidade e fonte.</p>
         </div>
         <button
           id="btnReset"
@@ -34,6 +34,32 @@ Configurações
         >
           Restaurar padrão
         </button>
+      </div>
+
+      <div class="space-y-3">
+        <p class="text-xs text-slate-400 uppercase tracking-[0.2em]">Modo</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <label class="cursor-pointer rounded-2xl border border-slate-800/80 bg-slate-950/70 p-3 hover:border-emerald-400 transition">
+            <input type="radio" name="mode" value="dark" class="hidden" />
+            <div class="flex items-center gap-3">
+              <span class="h-10 w-10 rounded-xl" style="background: linear-gradient(135deg, #0f172a, #020617);"></span>
+              <div>
+                <p class="text-sm font-medium">Escuro</p>
+                <p class="text-[11px] text-slate-400">Foco em contraste noturno</p>
+              </div>
+            </div>
+          </label>
+          <label class="cursor-pointer rounded-2xl border border-slate-800/80 bg-slate-950/70 p-3 hover:border-emerald-400 transition">
+            <input type="radio" name="mode" value="light" class="hidden" />
+            <div class="flex items-center gap-3">
+              <span class="h-10 w-10 rounded-xl border border-slate-300/80" style="background: linear-gradient(135deg, #f8fafc, #e2e8f0);"></span>
+              <div>
+                <p class="text-sm font-medium">Claro</p>
+                <p class="text-[11px] text-slate-400">Visual limpo para ambientes claros</p>
+              </div>
+            </div>
+          </label>
+        </div>
       </div>
 
       <div class="space-y-3">
@@ -157,6 +183,7 @@ Configurações
   const storageKey = "ui_settings";
   const defaults = window.__uiSettingsDefaults || {
     theme: "verde",
+    mode: "dark",
     font: "md",
     motion: "full",
     noise: "on",
@@ -168,6 +195,7 @@ Configurações
   const densitySelect = document.getElementById("densitySelect");
   const motionToggle = document.getElementById("motionToggle");
   const noiseToggle = document.getElementById("noiseToggle");
+  const modeInputs = Array.from(document.querySelectorAll("input[name='mode']"));
   const themeInputs = Array.from(document.querySelectorAll("input[name='theme']"));
   const btnReset = document.getElementById("btnReset");
 
@@ -197,6 +225,10 @@ Configurações
   }
 
   function applyToControls(data) {
+    modeInputs.forEach((input) => {
+      input.checked = input.value === data.mode;
+      input.parentElement?.classList.toggle("border-emerald-400", input.checked);
+    });
     themeInputs.forEach((input) => {
       input.checked = input.value === data.theme;
       input.parentElement?.classList.toggle("border-emerald-400", input.checked);
@@ -208,8 +240,10 @@ Configurações
   }
 
   function currentState() {
+    const mode = modeInputs.find((input) => input.checked)?.value || defaults.mode;
     const theme = themeInputs.find((input) => input.checked)?.value || defaults.theme;
     return {
+      mode,
       theme,
       font: fontSelect.value,
       density: densitySelect.value,
@@ -220,6 +254,13 @@ Configurações
 
   applyToControls(loadSettings());
 
+  modeInputs.forEach((input) => {
+    input.addEventListener("change", () => {
+      const next = currentState();
+      saveSettings(next);
+      applyToControls(next);
+    });
+  });
   themeInputs.forEach((input) => {
     input.addEventListener("change", () => {
       const next = currentState();

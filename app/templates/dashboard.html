@@ -19,7 +19,7 @@
     position: fixed;
     inset: 0;
     z-index: -1;
-    background-color: #020617; /* slate-950 */
+    background-color: rgba(var(--surface-950-rgb), 0.98);
     background-image: url("https://grainy-gradients.vercel.app/noise.svg");
     opacity: 0.05;
     pointer-events: none;
@@ -36,10 +36,10 @@
   /* Scrollbar fina para tabelas/listas */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #475569; }
+  ::-webkit-scrollbar-thumb { background: rgb(var(--text-500-rgb)); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgb(var(--text-600-rgb)); }
 
-  #map { z-index: 1; height: 100%; width: 100%; background: #0f172a; }
+  #map { z-index: 1; height: 100%; width: 100%; background: rgb(var(--surface-900-rgb)); }
   .foto-ratio { aspect-ratio: 4 / 3; }
   .assinatura-ratio { aspect-ratio: 3 / 1; }
 </style>
@@ -315,9 +315,22 @@
 
 
   <script>
-    // Configuracao padrao do Chart.js para Dark Mode
-    Chart.defaults.color = '#94a3b8';
-    Chart.defaults.borderColor = '#1e293b';
+    function cssVar(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function rgbVar(name, alpha = 1) {
+      const value = cssVar(name);
+      return alpha === 1 ? `rgb(${value})` : `rgba(${value}, ${alpha})`;
+    }
+
+    const chartPlaceholderColor = rgbVar("--text-500-rgb");
+    const chartGridColor = rgbVar("--surface-700-rgb");
+    const chartAccentColor = "#10b981";
+
+    // Configuracao padrao do Chart.js por modo ativo
+    Chart.defaults.color = rgbVar("--text-400-rgb");
+    Chart.defaults.borderColor = rgbVar("--surface-800-rgb");
     Chart.defaults.font.family = "'Inter', sans-serif";
 
     // Inicializacao do Mapa
@@ -705,7 +718,7 @@
         labels: ['Sem dados'],
         datasets: [{
           data: [1],
-          backgroundColor: ['#334155'],
+          backgroundColor: [chartPlaceholderColor],
           borderWidth: 0,
           hoverOffset: 4
         }]
@@ -727,8 +740,8 @@
         datasets: [{
           label: 'Registros',
           data: [0],
-          backgroundColor: '#334155',
-          hoverBackgroundColor: '#10b981',
+          backgroundColor: chartPlaceholderColor,
+          hoverBackgroundColor: chartAccentColor,
           borderRadius: 4,
           barThickness: 12
         }]
@@ -751,7 +764,7 @@
           data: [],
           fill: true,
           backgroundColor: 'rgba(16, 185, 129, 0.2)',
-          borderColor: '#10b981',
+          borderColor: chartAccentColor,
           tension: 0.4,
           pointRadius: 0,
           pointHoverRadius: 6
@@ -762,7 +775,7 @@
         maintainAspectRatio: false,
         interaction: { intersect: false, mode: 'index' },
         scales: {
-          y: { grid: { color: '#334155', drawBorder: false }, beginAtZero: true },
+          y: { grid: { color: chartGridColor, drawBorder: false }, beginAtZero: true },
           x: { grid: { display: false } }
         },
         plugins: { legend: { display: false } }
@@ -790,7 +803,7 @@
       chartTipo.data.datasets[0].data = tipoLabels.length ? tipoValues : [1];
       chartTipo.data.datasets[0].backgroundColor = tipoLabels.length
         ? tipoLabels.map((_, i) => tipoColors[i % tipoColors.length])
-        : ['#334155'];
+        : [chartPlaceholderColor];
       chartTipo.update();
 
       const projetosOrdenados = Object.entries(projetoCounts)
@@ -800,12 +813,12 @@
       if (projetosOrdenados.length) {
         chartProjeto.data.labels = projetosOrdenados.map(([k]) => k);
         chartProjeto.data.datasets[0].data = projetosOrdenados.map(([, v]) => v);
-        chartProjeto.data.datasets[0].backgroundColor = '#334155';
-        chartProjeto.data.datasets[0].hoverBackgroundColor = '#10b981';
+        chartProjeto.data.datasets[0].backgroundColor = chartPlaceholderColor;
+        chartProjeto.data.datasets[0].hoverBackgroundColor = chartAccentColor;
       } else {
         chartProjeto.data.labels = ['Sem dados'];
         chartProjeto.data.datasets[0].data = [0];
-        chartProjeto.data.datasets[0].backgroundColor = '#334155';
+        chartProjeto.data.datasets[0].backgroundColor = chartPlaceholderColor;
       }
       chartProjeto.update();
 

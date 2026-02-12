@@ -29,6 +29,7 @@ class ColaboradorUpdate(BaseModel):
 
 class ColaboradorOut(ColaboradorBase):
     id: int
+    email: Optional[str] = None
 
     class Config:
         from_attributes = True

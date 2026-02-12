@@ -19,12 +19,12 @@ Colaboradores de campo
     background:
       radial-gradient(1200px 280px at 10% 0%, rgba(16, 185, 129, 0.16), transparent 60%),
       radial-gradient(1000px 300px at 95% 15%, rgba(14, 116, 144, 0.14), transparent 58%),
-      rgba(2, 6, 23, 0.84);
+      rgba(var(--surface-950-rgb), 0.84);
   }
   .card-shell {
-    border: 1px solid rgba(51, 65, 85, 0.85);
-    background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.9));
-    box-shadow: inset 0 0 0 1px rgba(30, 41, 59, 0.35);
+    border: 1px solid rgba(var(--surface-700-rgb), 0.85);
+    background: linear-gradient(145deg, rgba(var(--surface-900-rgb), 0.9), rgba(var(--surface-950-rgb), 0.9));
+    box-shadow: inset 0 0 0 1px rgba(var(--surface-800-rgb), 0.35);
   }
   .table-shell thead th {
     position: sticky;
@@ -33,24 +33,24 @@ Colaboradores de campo
     backdrop-filter: blur(8px);
   }
   .dt-container {
-    color: #cbd5e1;
+    color: rgb(var(--text-300-rgb));
   }
   .dt-container .dt-length label,
   .dt-container .dt-search label {
-    color: #94a3b8;
+    color: rgb(var(--text-400-rgb));
     font-size: 11px;
   }
   .dt-container .dt-input,
   .dt-container select.dt-input {
-    background: rgba(15, 23, 42, 0.88) !important;
-    border: 1px solid rgba(51, 65, 85, 0.9) !important;
-    color: #e2e8f0 !important;
+    background: rgba(var(--surface-900-rgb), 0.88) !important;
+    border: 1px solid rgba(var(--surface-700-rgb), 0.9) !important;
+    color: rgb(var(--text-200-rgb)) !important;
     border-radius: 0.55rem;
   }
   .dt-container .dt-paging .dt-paging-button {
-    border: 1px solid rgba(51, 65, 85, 0.9) !important;
-    background: rgba(15, 23, 42, 0.82) !important;
-    color: #cbd5e1 !important;
+    border: 1px solid rgba(var(--surface-700-rgb), 0.9) !important;
+    background: rgba(var(--surface-900-rgb), 0.82) !important;
+    color: rgb(var(--text-300-rgb)) !important;
     border-radius: 0.5rem;
     margin: 0 2px;
   }
@@ -61,7 +61,7 @@ Colaboradores de campo
     color: #86efac !important;
   }
   .dt-container .dt-info {
-    color: #94a3b8;
+    color: rgb(var(--text-400-rgb));
     font-size: 11px;
   }
   .dt-container .dt-layout-row:last-child {
